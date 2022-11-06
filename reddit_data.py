@@ -25,7 +25,9 @@ def subreddit_submissions(reddit_instance: praw.Reddit, target_subreddit: str, s
     df_submissions = pd.DataFrame(submissions)
     # TODO Make a more formal method for timing and outputting progress
     print('Time to pull submissions: %f' % (time.perf_counter() - start))
-
+    
     if write_data_to_disk:
         # TODO implement a smart way to supply a desired path here
         df_submissions.to_csv('%s_submissions_raw_data.zip' % target_subreddit)
+    
+    return df_submissions

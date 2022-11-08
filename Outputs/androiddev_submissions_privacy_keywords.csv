@@ -1,0 +1,89 @@
+,Privacy Keyword,Search Location,number_of_occurnaces,Number of Submissions Searched
+0,first name,title,3,100040
+1,first name,selftext,9,100040
+2,last name,title,2,100040
+3,last name,selftext,9,100040
+4,real name,title,9,100040
+5,real name,selftext,19,100040
+6,identification number,title,0,100040
+7,identification number,selftext,2,100040
+8,id number,title,2,100040
+9,id number,selftext,8,100040
+10,social security number,title,0,100040
+11,social security number,selftext,3,100040
+12,ssn,title,5,100040
+13,ssn,selftext,45,100040
+14,license number,title,0,100040
+15,license number,selftext,1,100040
+16,passport number,title,0,100040
+17,passport number,selftext,0,100040
+18,screen name,title,0,100040
+19,screen name,selftext,4,100040
+20,user name,title,2,100040
+21,user name,selftext,10,100040
+22,account name,title,3,100040
+23,account name,selftext,13,100040
+24,user id,title,3,100040
+25,user id,selftext,21,100040
+26,username,title,24,100040
+27,username,selftext,162,100040
+28,userid,title,2,100040
+29,userid,selftext,29,100040
+30,online identifier,title,0,100040
+31,online identifier,selftext,1,100040
+32,imei,title,11,100040
+33,imei,selftext,47,100040
+34,device serial number,title,0,100040
+35,device serial number,selftext,1,100040
+36,advertising id,title,21,100040
+37,advertising id,selftext,27,100040
+38,android id,title,14,100040
+39,android id,selftext,10,100040
+40,ssaid,title,1,100040
+41,ssaid,selftext,0,100040
+42,mac address,title,15,100040
+43,mac address,selftext,24,100040
+44,imsi,title,2,100040
+45,imsi,selftext,3,100040
+46,instance id,title,3,100040
+47,instance id,selftext,5,100040
+48,guid,title,911,100040
+49,guid,selftext,1481,100040
+50,internet protocol address,title,0,100040
+51,internet protocol address,selftext,0,100040
+52,ip address,title,13,100040
+53,ip address,selftext,46,100040
+54,email address,title,12,100040
+55,email address,selftext,93,100040
+56,telephone number,title,0,100040
+57,telephone number,selftext,2,100040
+58,phone number,title,44,100040
+59,phone number,selftext,108,100040
+60,line1,title,0,100040
+61,line1,selftext,4,100040
+62,video recording,title,7,100040
+63,video recording,selftext,11,100040
+64,camera,title,548,100040
+65,camera,selftext,566,100040
+66,gallery,title,113,100040
+67,gallery,selftext,168,100040
+68,audio recording,title,6,100040
+69,audio recording,selftext,12,100040
+70,microphone,title,38,100040
+71,microphone,selftext,62,100040
+72,voice,title,157,100040
+73,voice,selftext,188,100040
+74,location,title,471,100040
+75,location,selftext,1108,100040
+76,physical street address,title,0,100040
+77,physical street address,selftext,0,100040
+78,home address,title,13,100040
+79,home address,selftext,18,100040
+80,physical address,title,15,100040
+81,physical address,selftext,14,100040
+82,street name,title,0,100040
+83,street name,selftext,1,100040
+84,city name,title,0,100040
+85,city name,selftext,1,100040
+86,postal address,title,1,100040
+87,postal address,selftext,3,100040

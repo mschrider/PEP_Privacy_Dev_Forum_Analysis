@@ -19,17 +19,22 @@ target_subreddits = [{'subreddit': 'androiddev',
                       'before': before,
                       'after': int(datetime.datetime(2009, 7, 12, 0, 0).timestamp()),
                       'use_existing_data': True,
-                      'data_path': r'Data/androiddev_submissions_raw_data.zip'},
+                      'submissions_data_path': r'Data/androiddev_submissions_raw_data.zip'},
                      {'subreddit': 'webdev',
                       'before': before,
                       'after': int(datetime.datetime(2009, 1, 25, 0, 0).timestamp()),
                       'use_existing_data': True,
-                      'data_path': r'Data/webdev_submissions_raw_data.zip'},
+                      'submissions_data_path': r'Data/webdev_submissions_raw_data.zip'},
                      {'subreddit': 'iosdev',
                       'before': before,
                       'after': int(datetime.datetime(2010, 10, 13, 0, 0).timestamp()),
                       'use_existing_data': True,
-                      'data_path': r'Data/iosdev_submissions_raw_data.zip'}]
+                      'submissions_data_path': r'Data/iosdev_submissions_raw_data.zip'},
+                     {'subreddit': 'iOSProgramming',
+                      'before': before,
+                      'after': int(datetime.datetime(2010, 11, 1, 0, 0).timestamp()),
+                      'use_existing_data': True,
+                      'submissions_data_path': r'Data/iOSProgramming_submissions_raw_data.zip'}]
 
 # Boolean to control if data is written to disk
 write_data_to_disk = True
@@ -41,7 +46,7 @@ use_existing_data = True
 submissions = {}
 for target_subreddit in target_subreddits:
     if target_subreddit['use_existing_data']:
-        submissions[target_subreddit['target_subreddit']] = pd.read_csv(target_subreddit['data_path'])
+        submissions[target_subreddit['target_subreddit']] = pd.read_csv(target_subreddit['submissions_data_path'])
     else:
         # TODO - Add functionality for use_existing_data = False case
         pass
@@ -69,9 +74,9 @@ def privacy_keywords(text: Union[pd.DataFrame, np.ndarray], subreddit: str, redd
     # TODO - Refactor. This does not feel like it is implemented cleanly
     with open(r'Config/analysis_settings.json') as json_file:
         settings = json.load(json_file)
-    privacy_keywords = settings['privacy_keywords']
+    target_privacy_keywords = settings['privacy_keywords']
 
-    keywords_df = pd.DataFrame(term_frequency(text, privacy_keywords, target_columns=target_columns))
+    keywords_df = pd.DataFrame(term_frequency(text, target_privacy_keywords, target_columns=target_columns))
     if reddit_data_type == 'submissions':
         keywords_df.rename(columns={'target_word': 'Privacy Keyword',
                                     'target_column': 'Search Location',

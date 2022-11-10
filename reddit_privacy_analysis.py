@@ -4,6 +4,7 @@ import json
 import reddit_data
 from typing import Union
 from pmaw import PushshiftAPI
+import praw
 import datetime
 
 # This line looks for a praw.ini config file in your working directory; See the config section of the readme for details
@@ -46,7 +47,7 @@ use_existing_data = True
 submissions = {}
 for target_subreddit in target_subreddits:
     if target_subreddit['use_existing_data']:
-        submissions[target_subreddit['target_subreddit']] = pd.read_csv(target_subreddit['submissions_data_path'])
+        submissions[target_subreddit['subreddit']] = pd.read_csv(target_subreddit['submissions_data_path'])
     else:
         # TODO - Add functionality for use_existing_data = False case
         pass

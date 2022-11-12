@@ -23,12 +23,14 @@ This git project is intended to keep a record of and allow easy reproduction of 
 
 Code within this project can potentially be leveraged to analyze privacy behavior of other subreddits but compatibility is not guaranteed.
 
-# Dependencies and Prerequisites - TBD
-## Python Library Dependencies - TBD
+# Dependencies and Prerequisites - WIP
+## Python Library Dependencies - WIP
 This project is built from the following python libraries:
 * [Python Reddit API Wrapper (PRAW)](https://praw.readthedocs.io/en/stable/getting_started/authentication.html "Python Reddit API Wrapper (PRAW)")
+* [PMAW: Pushshift Multithread API Wrapper](https://github.com/mattpodolak/pmaw "PMAW: Pushshift Multithread API Wrapper")
 * [Pandas](https://pandas.pydata.org/ "Pandas")
 * [matplotlib](https://matplotlib.org/ "matplotlib")
+* [wordcloud](https://amueller.github.io/word_cloud/ "wordcloud")
 ## Reddit Account and Application Registration
 For fetching up to date Reddit posts, this project requires a read only connection with Reddit. This connection is not required if only static datasets from github are used. 
 
@@ -40,7 +42,7 @@ To use PRAW OAuth, connection details based on the registered account/applicatio
 
 # How to Use
 
-## Directly Running with Static Datasets - TBD
+## Directly Running with Static Datasets - WIP
 The simpliest method to directly reproduce the outputs of this project using the static datasets in github is to run the following:   
 ```python
 import reddit_privacy_analysis 

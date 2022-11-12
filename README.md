@@ -90,7 +90,9 @@ Details on the implementation of the analysis are located in [Data Analysis](htt
 
 # Data Analysis - TBD
 
-## ERD and Format of Reddit Data - TBD
+## ERD and Format of Reddit Data
+Reddit data pulled in this project is submissions (posts) and comments. The primary key for submissions is the **name** field. This analysis used a praw instance as the basis for the pmaw api, this results in the queried submissions primary key being called **name**. Other methods of pulling of reddit posts may call this field **id**. The primary key for comments is the **id** field. Comments exist either as children under a submission or under other comments (which themselves exist under either submissions or comments). The **parent_id** links the comment to the parent submission **name** (the **parent_id** is prepended with "t3_" compared to the **name**). The **parent_id** field on the comment indicates the immediate parent submission or comment; if the parent is a comment the **parent_id** is prepended with a "t1_" and if the parent is a submission the **parent_id** is prepended with a "t3_". The **nest_level** field indicates the nested distance from the comment to its source parent submission.
+![ERL_Diagram](misc/Submission_Comment_ERL.jpg)
 
 ## Data Cleansing - TBD
 

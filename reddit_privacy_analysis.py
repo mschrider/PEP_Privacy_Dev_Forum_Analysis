@@ -6,6 +6,9 @@ from typing import Union
 from pmaw import PushshiftAPI
 import praw
 import datetime
+from wordcloud import WordCloud, STOPWORDS
+import matplotlib.pyplot as plt
+from collections import Counter
 
 # This line looks for a praw.ini config file in your working directory; See the config section of the readme for details
 reddit = praw.Reddit()
@@ -93,6 +96,26 @@ def privacy_keywords(text: Union[pd.DataFrame, np.ndarray], subreddit: str, redd
 
     return keywords_df
 
-def word_cloud(text, words_to_exclude):
-    pass
 
+def word_frequency(text_column: Union[pd.DataFrame, np.ndarray], words_to_exclude=STOPWORDS, number_of_words=25):
+    words = " ".join(text_column.to_list()).split().lower()
+    word_counts = Counter([w for w in words if w not in words_to_exclude]).most_common(number_of_words)
+    return {c[0]: c[1] for c in word_counts}
+
+def word_cloud(text_column, words_to_exclude=STOPWORDS, stopwords=STOPWORDS, number_of_words=25):
+    frequencies = word_frequency(text_column=text_column,
+                                 words_to_exclude=words_to_exclude,
+                                 number_of_words=number_of_words)
+
+    wordcloud = WordCloud(width=800, height=800,
+                          background_color='white',
+                          stopwords=stopwords,
+                          min_font_size=10).generate_from_frequencies(frequencies)
+
+    # plot the WordCloud image
+    plt.figure(figsize=(8, 8), facecolor=None)
+    plt.imshow(wordcloud)
+    plt.axis("off")
+    plt.tight_layout(pad=0)
+
+    plt.show()

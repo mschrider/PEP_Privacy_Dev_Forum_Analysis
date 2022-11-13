@@ -5,7 +5,7 @@ import reddit_data
 from typing import Union
 from pmaw import PushshiftAPI
 import praw
-import datetime
+from datetime import datetime
 from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 from collections import Counter
@@ -18,42 +18,27 @@ print('Connected as: %s' % reddit.user.me())
 # TODO - Make config json or other solution to move selection options and controls outside code
 
 # Define the subreddits and dates that this analysis will target
-before = int(datetime.datetime(2022, 11, 1, 0, 0).timestamp())
-target_subreddits = [{'subreddit': 'androiddev',
-                      'before': before,
-                      'after': int(datetime.datetime(2009, 7, 12, 0, 0).timestamp()),
-                      'use_existing_data': True,
-                      'submissions_data_path': r'Data/androiddev_submissions_raw_data.zip'},
-                     {'subreddit': 'webdev',
-                      'before': before,
-                      'after': int(datetime.datetime(2009, 1, 25, 0, 0).timestamp()),
-                      'use_existing_data': True,
-                      'submissions_data_path': r'Data/webdev_submissions_raw_data.zip'},
-                     {'subreddit': 'iosdev',
-                      'before': before,
-                      'after': int(datetime.datetime(2010, 10, 13, 0, 0).timestamp()),
-                      'use_existing_data': True,
-                      'submissions_data_path': r'Data/iosdev_submissions_raw_data.zip'},
-                     {'subreddit': 'iOSProgramming',
-                      'before': before,
-                      'after': int(datetime.datetime(2010, 11, 1, 0, 0).timestamp()),
-                      'use_existing_data': True,
-                      'submissions_data_path': r'Data/iOSProgramming_submissions_raw_data.zip'}]
+with open(r'Config/subreddits.json') as subreddit_json:
+    target_subreddits = json.load(subreddit_json)['subreddits']
 
 # Boolean to control if data is written to disk
-write_data_to_disk = True
+write_data = True
 
 # Flag to use existing datasets or to pull new ones
 use_existing_data = True
 
 # Get all submissions for the target subreddits
 submissions = {}
-for target_subreddit in target_subreddits:
-    if target_subreddit['use_existing_data']:
-        submissions[target_subreddit['subreddit']] = pd.read_csv(target_subreddit['submissions_data_path'])
+for subreddit in target_subreddits:
+    name = subreddit['subreddit']
+    if subreddit['use_existing_data']:
+        submissions[name] = pd.read_csv(subreddit['submissions_data_path'])
     else:
-        # TODO - Add functionality for use_existing_data = False case
-        pass
+        submissions[name] = reddit_data.submissions(api_instance=api_praw,
+                                                    target_subreddit=subreddit,
+                                                    before=int(datetime.strptime(subreddit['before'], '%m/%d/%Y').timestamp()),
+                                                    after=int(datetime.strptime(subreddit['after'], '%m/%d/%Y').timestamp()),
+                                                    write_data=write_data)
 
 
 def term_frequency(text: Union[pd.DataFrame, np.ndarray], target_words: list[str], target_columns=None):
@@ -70,7 +55,6 @@ def term_frequency(text: Union[pd.DataFrame, np.ndarray], target_words: list[str
             number_of_occurrences = np.sum(text[target_column].str.contains(target_word, case=False))
             results.append({'target_word': target_word, 'target_column': target_column,
                             'number_of_occurrences': number_of_occurrences, 'total_number_of_rows': row_count})
-
     return results
 
 
@@ -91,16 +75,18 @@ def privacy_keywords(text: Union[pd.DataFrame, np.ndarray], subreddit: str, redd
         # TODO - Implement for comments
         pass
 
-    if write_data_to_disk:
+    if write_data:
         keywords_df.to_csv(r'Outputs\%s_%s_privacy_keywords.csv' % (subreddit, reddit_data_type))
 
     return keywords_df
 
 
 def word_frequency(text_column: Union[pd.DataFrame, np.ndarray], words_to_exclude=STOPWORDS, number_of_words=25):
-    words = " ".join(text_column.to_list()).split().lower()
+    # TODO - Take into account mixed typing, and develop words to exclude further
+    words = " ".join(text_column.to_list()).split()
     word_counts = Counter([w for w in words if w not in words_to_exclude]).most_common(number_of_words)
     return {c[0]: c[1] for c in word_counts}
+
 
 def word_cloud(text_column, words_to_exclude=STOPWORDS, stopwords=STOPWORDS, number_of_words=25):
     frequencies = word_frequency(text_column=text_column,

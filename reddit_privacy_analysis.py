@@ -35,7 +35,7 @@ for subreddit in target_subreddits:
         submissions[name] = pd.read_csv(subreddit['submissions_data_path'])
     else:
         submissions[name] = reddit_data.submissions(api_instance=api_praw,
-                                                    target_subreddit=subreddit,
+                                                    target_subreddit=name,
                                                     before=int(datetime.strptime(subreddit['before'], '%m/%d/%Y').timestamp()),
                                                     after=int(datetime.strptime(subreddit['after'], '%m/%d/%Y').timestamp()),
                                                     write_data=write_data)

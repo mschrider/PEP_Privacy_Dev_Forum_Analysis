@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import json
 import reddit_data
+import re
 from typing import Union
 from pmaw import PushshiftAPI
 import praw
@@ -9,6 +10,8 @@ from datetime import datetime
 from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 from collections import Counter
+from nltk.sentiment.vader import SentimentIntensityAnalyzer as SIA
+from nltk import tokenize
 
 # This line looks for a praw.ini config file in your working directory; See the config section of the readme for details
 reddit = praw.Reddit()
@@ -105,3 +108,48 @@ def word_cloud(text_column, words_to_exclude=STOPWORDS, stopwords=STOPWORDS, num
     plt.tight_layout(pad=0)
 
     plt.show()
+
+
+def tag_submissions(submission_file: str):
+    df_to_tag = pd.read_csv(submission_file)
+    with open(r'Config/analysis_settings.json') as json_file:
+        settings = json.load(json_file)
+    target_privacy_keywords = settings['privacy_keywords']
+    regex_privacy_list = '|'.join(target_privacy_keywords)
+    
+    gdpr_check = 'GDPR|General Data Protection Regulation'
+    ccpa_check = 'CCPA|CCPR|California Consumer Privacy Act|California Consumer Privacy Regulation'
+    
+    df_to_tag["title_privacy_flag"]  = np.where(df_to_tag.title.str.contains(regex_privacy_list, regex=True),1,0)
+    df_to_tag["title_GDPR_flag"]  = np.where(df_to_tag.title.str.contains(gdpr_check,flags=re.IGNORECASE, regex=True),1,0)
+    df_to_tag["title_CCPA_flag"]  = np.where(df_to_tag.title.str.contains(ccpa_check,flags=re.IGNORECASE, regex=True),1,0)
+    
+    df_to_tag["body_privacy_flag"]  = np.where(df_to_tag.selftext.str.contains(regex_privacy_list, regex=True),1,0)
+    df_to_tag["body_GDPR_flag"]  = np.where(df_to_tag.selftext.str.contains(gdpr_check,flags=re.IGNORECASE, regex=True),1,0)
+    df_to_tag["body_CCPA_flag"]  = np.where(df_to_tag.selftext.str.contains(ccpa_check,flags=re.IGNORECASE, regex=True),1,0)
+    
+    return df_to_tag
+
+
+def submissions_sentiment_analysis(submission_file: str):
+    df_sentiment = pd.read_csv(submission_file)
+    
+    # TODO: Need to clean up selftext in a way that the polarity scores can be run against it, currently breaking (Toeknize isn't necessarily right)    
+    df_sentiment.selftext = tokenize.sent_tokenize(df_sentiment.selftext)
+    
+    sid_obj = SIA()
+    
+    df_sentiment["title_sentiment_polarity_scores"] = df_sentiment.title.apply(sid_obj.polarity_scores)
+    # TODO: Using 0.1 as a baseline for neutrality, may want to do some reviewing and tweaking
+    df_sentiment["title_sentiment"] = np.where(df_sentiment.title_sentiment_polarity_scores.apply(lambda x: x.get('compound')) >= 0.1, 'Positive', np.where(
+        df_sentiment.title_sentiment_polarity_scores.apply(lambda x: x.get('compound')) <= -0.1, 'Negative', 'Neutral'))
+    
+    df_sentiment["body_sentiment_polarity_scores"] = df_sentiment.selftext.apply(sid_obj.polarity_scores)
+    # TODO: Using 0.1 as a baseline for neutrality, may want to do some reviewing and tweaking
+    df_sentiment["body_sentiment"] = np.where(df_sentiment.body_sentiment_polarity_scores.apply(lambda x: x.get('compound')) >= 0.1, 'Positive', np.where(
+        df_sentiment.title_sentiment_polarity_scores.apply(lambda x: x.get('compound')) <= -0.1, 'Negative', 'Neutral'))
+    
+    return df_sentiment
+    
+    
+    

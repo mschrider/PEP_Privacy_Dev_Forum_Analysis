@@ -7,10 +7,10 @@ from typing import Union
 from pmaw import PushshiftAPI
 import praw
 from datetime import datetime
-from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 from collections import Counter
 from nltk.sentiment.vader import SentimentIntensityAnalyzer as SIA
+from nltk.stem import WordNetLemmatizer
 from nltk import tokenize
 
 # This line looks for a praw.ini config file in your working directory; See the config section of the readme for details
@@ -134,9 +134,6 @@ def tag_submissions(submission_file: str):
 def submissions_sentiment_analysis(submission_file: str):
     df_sentiment = pd.read_csv(submission_file)
     
-    # TODO: Need to clean up selftext in a way that the polarity scores can be run against it, currently breaking (Toeknize isn't necessarily right)    
-    df_sentiment.selftext = tokenize.sent_tokenize(df_sentiment.selftext)
-    
     sid_obj = SIA()
     
     df_sentiment["title_sentiment_polarity_scores"] = df_sentiment.title.apply(sid_obj.polarity_scores)
@@ -144,12 +141,39 @@ def submissions_sentiment_analysis(submission_file: str):
     df_sentiment["title_sentiment"] = np.where(df_sentiment.title_sentiment_polarity_scores.apply(lambda x: x.get('compound')) >= 0.1, 'Positive', np.where(
         df_sentiment.title_sentiment_polarity_scores.apply(lambda x: x.get('compound')) <= -0.1, 'Negative', 'Neutral'))
     
+    df_sentiment.selftext.fillna('', inplace=True)
+    df_sentiment.selftext.astype("string")
+    df_sentiment["cleaned_selftext"] = df_sentiment.selftext.apply(remove_emoji)
     df_sentiment["body_sentiment_polarity_scores"] = df_sentiment.selftext.apply(sid_obj.polarity_scores)
     # TODO: Using 0.1 as a baseline for neutrality, may want to do some reviewing and tweaking
     df_sentiment["body_sentiment"] = np.where(df_sentiment.body_sentiment_polarity_scores.apply(lambda x: x.get('compound')) >= 0.1, 'Positive', np.where(
         df_sentiment.title_sentiment_polarity_scores.apply(lambda x: x.get('compound')) <= -0.1, 'Negative', 'Neutral'))
     
     return df_sentiment
+
+
+def token_lemmat_prep(submission_file: str):
+    df_to_prep = pd.read_csv(submission_file)
     
+    lemmatizer = WordNetLemmatizer()
     
+    df_to_prep["lemmatized_title"] = df_to_prep.title.apply(tokenize.word_tokenize)
+    df_to_prep["lemmatized_title"] = df_to_prep.lemmatized_title.apply(lambda lst: [lemmatizer.lemmatize(word) for word in lst])
+    
+    df_to_prep["lemmatized_body"] = df_to_prep.selftext.apply(tokenize.word_tokenize)
+    df_to_prep["lemmatized_body"] = df_to_prep.lemmatized_body.apply(lambda lst: [lemmatizer.lemmatize(word) for word in lst])
+    
+    return df_to_prep
+
+
+def remove_emoji(string):
+    emoji_pattern = re.compile("["
+                           u"\U0001F600-\U0001F64F"  # emoticons
+                           u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+                           u"\U0001F680-\U0001F6FF"  # transport & map symbols
+                           u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+                           u"\U00002702-\U000027B0"
+                           u"\U000024C2-\U0001F251"
+                           "]+", flags=re.UNICODE)
+    return emoji_pattern.sub(r'', string)
     

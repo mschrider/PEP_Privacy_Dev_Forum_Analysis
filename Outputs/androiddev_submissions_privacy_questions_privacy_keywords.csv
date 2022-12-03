@@ -1,0 +1,89 @@
+,Privacy Keyword,Search Location,Number of Occurrences,Number of Submissions Searched
+0,first name,title,0,5629
+1,first name,selftext,3,5629
+2,last name,title,0,5629
+3,last name,selftext,3,5629
+4,real name,title,2,5629
+5,real name,selftext,4,5629
+6,identification number,title,0,5629
+7,identification number,selftext,0,5629
+8,id number,title,1,5629
+9,id number,selftext,1,5629
+10,social security number,title,0,5629
+11,social security number,selftext,0,5629
+12,ssn,title,1,5629
+13,ssn,selftext,4,5629
+14,license number,title,0,5629
+15,license number,selftext,0,5629
+16,passport number,title,0,5629
+17,passport number,selftext,0,5629
+18,screen name,title,0,5629
+19,screen name,selftext,1,5629
+20,user name,title,1,5629
+21,user name,selftext,4,5629
+22,account name,title,1,5629
+23,account name,selftext,2,5629
+24,user id,title,0,5629
+25,user id,selftext,6,5629
+26,username,title,7,5629
+27,username,selftext,54,5629
+28,userid,title,0,5629
+29,userid,selftext,3,5629
+30,online identifier,title,0,5629
+31,online identifier,selftext,0,5629
+32,imei,title,2,5629
+33,imei,selftext,3,5629
+34,device serial number,title,0,5629
+35,device serial number,selftext,0,5629
+36,advertising id,title,0,5629
+37,advertising id,selftext,0,5629
+38,android id,title,0,5629
+39,android id,selftext,1,5629
+40,ssaid,title,0,5629
+41,ssaid,selftext,0,5629
+42,mac address,title,2,5629
+43,mac address,selftext,4,5629
+44,imsi,title,0,5629
+45,imsi,selftext,1,5629
+46,instance id,title,1,5629
+47,instance id,selftext,1,5629
+48,guid,title,200,5629
+49,guid,selftext,507,5629
+50,internet protocol address,title,0,5629
+51,internet protocol address,selftext,0,5629
+52,ip address,title,5,5629
+53,ip address,selftext,10,5629
+54,email address,title,1,5629
+55,email address,selftext,33,5629
+56,telephone number,title,0,5629
+57,telephone number,selftext,1,5629
+58,phone number,title,18,5629
+59,phone number,selftext,37,5629
+60,line1,title,0,5629
+61,line1,selftext,3,5629
+62,video recording,title,0,5629
+63,video recording,selftext,3,5629
+64,camera,title,153,5629
+65,camera,selftext,183,5629
+66,gallery,title,18,5629
+67,gallery,selftext,50,5629
+68,audio recording,title,0,5629
+69,audio recording,selftext,2,5629
+70,microphone,title,12,5629
+71,microphone,selftext,19,5629
+72,voice,title,35,5629
+73,voice,selftext,45,5629
+74,location,title,125,5629
+75,location,selftext,232,5629
+76,physical street address,title,0,5629
+77,physical street address,selftext,0,5629
+78,home address,title,1,5629
+79,home address,selftext,4,5629
+80,physical address,title,2,5629
+81,physical address,selftext,2,5629
+82,street name,title,0,5629
+83,street name,selftext,0,5629
+84,city name,title,0,5629
+85,city name,selftext,1,5629
+86,postal address,title,0,5629
+87,postal address,selftext,0,5629

@@ -8,11 +8,12 @@ from pmaw import PushshiftAPI
 import praw
 from datetime import datetime
 import matplotlib.pyplot as plt
+import heapq
 from collections import Counter
 from nltk.sentiment.vader import SentimentIntensityAnalyzer as SIA
 from nltk.stem import WordNetLemmatizer
 from nltk import tokenize, corpus, word_tokenize, NaiveBayesClassifier
-from wordcloud import WordCloud, STOPWORDS
+# from wordcloud import WordCloud, STOPWORDS
 
 # This line looks for a praw.ini config file in your working directory; See the config section of the readme for details
 # reddit = praw.Reddit()
@@ -192,9 +193,6 @@ def privacy_questions(submission_file: str):
                       privacy_df['selftext_dialogue_act_type'].str.contains('Question', regex=True)].copy()
 
 
-def submissions_sentiment_analysis(submission_file: str):
-    df_sentiment = pd.read_csv(submission_file)
-
 def clean_submission(df_to_clean):
     df_to_clean["created_utc"] = pd.to_datetime(df_to_clean["created_utc"], unit='s')
     df_to_clean.selftext.fillna('', inplace=True)
@@ -280,45 +278,85 @@ def word_frequency_analysis(df_to_count):
     privacy_body_word_freq = FreqDist(privacy_body_words)
     privacy_body_word_freq.plot(25, cumulative=False, title="Privacy Body Word Freq")
     
-    title_word_freq_dict = dict(title_word_freq)
-    body_word_freq_dict = dict(body_word_freq)
+    # title_word_freq_dict = dict(title_word_freq)
+    # body_word_freq_dict = dict(body_word_freq)
     privacy_title_word_freq_dict = dict(privacy_title_word_freq)
     privacy_body_word_freq_dict = dict(privacy_body_word_freq)
     
-    return title_word_freq_dict, body_word_freq_dict, privacy_title_word_freq_dict, privacy_body_word_freq_dict
+    top_2_title_words = heapq.nlargest(2,
+                                       privacy_title_word_freq_dict,
+                                       key=privacy_title_word_freq_dict.get)
+    top_2_body_words = heapq.nlargest(2,
+                                      privacy_body_word_freq_dict,
+                                      key=privacy_body_word_freq_dict.get)
+    
+    privacy_df["num_top_words_title"] = privacy_df.lemmatized_title.apply(lambda lst: lst.count(top_2_title_words[0]) + lst.count(top_2_title_words[1]))
+    privacy_df["num_top_words_body"] = privacy_df.lemmatized_body.apply(lambda lst: lst.count(top_2_body_words[0]) + lst.count(top_2_body_words[1]))
+    
+    
+    return privacy_df
     
 
 def overall_analysis(df_to_analyze):
     
     gdpr_date = datetime(2016, 4, 20)
     ccpa_date = datetime(2018, 6, 28)
+    subreddit = df_to_analyze['subreddit'].iloc[0]
     
     privacy_df = df_to_analyze.loc[(df_to_analyze["title_privacy_flag"] == 1) | (df_to_analyze["body_privacy_flag"] == 1)].copy()
-    privacy_df = privacy_df[["created_utc", "title_sentiment"]].copy()
+    privacy_df = privacy_df[["created_utc", "title_sentiment", "body_sentiment"]].copy()
     privacy_df.set_index("created_utc", inplace=True)
-    privacy_df_monthly_sentiment = privacy_df.groupby(pd.Grouper(freq="M")).apply(lambda x: pd.Series(dict(Total_Positive=(x.title_sentiment == 'Positive').sum(),
-                                                                                                       Total_Neutral=(x.title_sentiment == 'Neutral').sum(),
-                                                                                                       Total_Negative=(x.title_sentiment == 'Negative').sum())))
-    privacy_df_monthly_sentiment["total"] = privacy_df_monthly_sentiment.sum(axis=1)
-    privacy_df_monthly_sentiment["Total_Positive"] = privacy_df_monthly_sentiment["Total_Positive"]/privacy_df_monthly_sentiment["total"]
-    privacy_df_monthly_sentiment["Total_Neutral"] = privacy_df_monthly_sentiment["Total_Neutral"]/privacy_df_monthly_sentiment["total"]
-    privacy_df_monthly_sentiment["Total_Negative"] = privacy_df_monthly_sentiment["Total_Negative"]/privacy_df_monthly_sentiment["total"]
-    privacy_df_monthly_sentiment.drop(columns="total", inplace=True)
+    privacy_df_monthly_sentiment = privacy_df.groupby(pd.Grouper(freq="M")).apply(lambda x: pd.Series(dict(Percent_Positive_Title=(x.title_sentiment == 'Positive').sum(),
+                                                                                                           Percent_Neutral_Title=(x.title_sentiment == 'Neutral').sum(),
+                                                                                                           Percent_Negative_Title=(x.title_sentiment == 'Negative').sum(),
+                                                                                                           Percent_Positive_Body=(x.body_sentiment == 'Positive').sum(),
+                                                                                                           Percent_Neutral_Body=(x.body_sentiment == 'Neutral').sum(),
+                                                                                                           Percent_Negative_Body=(x.body_sentiment == 'Negative').sum())))
+    
+    privacy_df_monthly_sentiment["title_total"] = privacy_df_monthly_sentiment[["Percent_Positive_Title", "Percent_Neutral_Title", "Percent_Negative_Title"]].sum(axis=1)
+    privacy_df_monthly_sentiment["body_total"] = privacy_df_monthly_sentiment[["Percent_Positive_Body", "Percent_Neutral_Body", "Percent_Negative_Body"]].sum(axis=1)
+    
+    privacy_df_monthly_sentiment["Percent_Positive_Title"] = privacy_df_monthly_sentiment["Percent_Positive_Title"]/privacy_df_monthly_sentiment["title_total"]
+    privacy_df_monthly_sentiment["Percent_Neutral_Title"] = privacy_df_monthly_sentiment["Percent_Neutral_Title"]/privacy_df_monthly_sentiment["title_total"]
+    privacy_df_monthly_sentiment["Percent_Negative_Title"] = privacy_df_monthly_sentiment["Percent_Negative_Title"]/privacy_df_monthly_sentiment["title_total"]
+    privacy_df_monthly_sentiment["Percent_Positive_Body"] = privacy_df_monthly_sentiment["Percent_Positive_Body"]/privacy_df_monthly_sentiment["body_total"]
+    privacy_df_monthly_sentiment["Percent_Neutral_Body"] = privacy_df_monthly_sentiment["Percent_Neutral_Body"]/privacy_df_monthly_sentiment["body_total"]
+    privacy_df_monthly_sentiment["Percent_Negative_Body"] = privacy_df_monthly_sentiment["Percent_Negative_Body"]/privacy_df_monthly_sentiment["body_total"]
+    privacy_df_monthly_sentiment.drop(columns=["title_total", "body_total"], inplace=True)
+    
+    title_max = max(privacy_df_monthly_sentiment[["Percent_Positive_Title", "Percent_Neutral_Title", "Percent_Negative_Title"]].max())
+    body_max = max(privacy_df_monthly_sentiment[["Percent_Positive_Body", "Percent_Neutral_Body", "Percent_Negative_Body"]].max())
     
     # TODO: May want to plot total posts as a secondary axes for context?
-    plt.figure()
-    privacy_df_monthly_sentiment.plot()
-    plt.axvline(gdpr_date, color="black", label="GDPR")
-    plt.axvline(ccpa_date, color="black", label="CCPA")
-    plt.text(gdpr_date, .9, "GDPR")
-    plt.text(ccpa_date, .9, "CCPA")
+    fig, (ax1, ax2) = plt.subplots(2,1)
+    fig.suptitle("%s Sentiment Percentage Over Time" % subreddit)
+    privacy_df_monthly_sentiment[["Percent_Positive_Title", "Percent_Neutral_Title", "Percent_Negative_Title"]].plot(ax=ax1)
+    ax1.axvline(gdpr_date, color="black", label="GDPR")
+    ax1.axvline(ccpa_date, color="black", label="CCPA")
+    ax1.text(gdpr_date, title_max*.9, "GDPR")
+    ax1.text(ccpa_date, title_max*.9, "CCPA")
+    ax1.legend(fontsize = 'small',
+               labels=["Percent_Positive_Title", "Percent_Neutral_Title", "Percent_Negative_Title"],
+               bbox_to_anchor=(1.4, 1),
+               loc=1,
+               ncol=1)
+    privacy_df_monthly_sentiment[["Percent_Positive_Body", "Percent_Neutral_Body", "Percent_Negative_Body"]].plot(ax=ax2)
+    ax2.axvline(gdpr_date, color="black", label="GDPR")
+    ax2.axvline(ccpa_date, color="black", label="CCPA")
+    ax2.text(gdpr_date, body_max*.9, "GDPR")
+    ax2.text(ccpa_date, body_max*.9, "CCPA")
+    ax2.legend(fontsize = 'small',
+               labels=["Percent_Positive_Body", "Percent_Neutral_Body", "Percent_Negative_Body"],
+               bbox_to_anchor=(1.4, 1),
+               loc=1,
+               ncol=1)
     
     return privacy_df_monthly_sentiment
 
 
 if __name__ == "__main__":
     start = time.perf_counter()
-    submission_file = 'Data/androiddev_submissions_raw_data.zip'
+    submission_file = 'Data/iOSProgramming_submissions_raw_data.zip'
     
     test_df = pd.read_csv(submission_file)
     test_df = test_df[["subreddit", "selftext", "gilded", "title", "upvote_ratio", "created_utc"]]
@@ -330,4 +368,6 @@ if __name__ == "__main__":
     end = time.perf_counter()
     print('Time to preprocess: %f' % (end - start))
     
-    title_freq, body_freq, p_title_freq, p_body_freq = word_frequency_analysis(test_df)
+    test_df = word_frequency_analysis(test_df)
+    
+    overall_analysis(test_df)

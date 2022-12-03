@@ -11,37 +11,38 @@ import matplotlib.pyplot as plt
 from collections import Counter
 from nltk.sentiment.vader import SentimentIntensityAnalyzer as SIA
 from nltk.stem import WordNetLemmatizer
-from nltk import tokenize
+from nltk import tokenize, corpus, word_tokenize, NaiveBayesClassifier
+from wordcloud import WordCloud, STOPWORDS
 
 # This line looks for a praw.ini config file in your working directory; See the config section of the readme for details
-reddit = praw.Reddit()
-api_praw = PushshiftAPI(praw=reddit)
-print('Connected as: %s' % reddit.user.me())
+# reddit = praw.Reddit()
+# api_praw = PushshiftAPI(praw=reddit)
+# print('Connected as: %s' % reddit.user.me())
 
 # TODO - Make config json or other solution to move selection options and controls outside code
 
-# Define the subreddits and dates that this analysis will target
-with open(r'Config/subreddits.json') as subreddit_json:
-    target_subreddits = json.load(subreddit_json)['subreddits']
-
-# Boolean to control if data is written to disk
-write_data = True
-
-# Flag to use existing datasets or to pull new ones
-use_existing_data = True
-
-# Get all submissions for the target subreddits
-submissions = {}
-for subreddit in target_subreddits:
-    name = subreddit['subreddit']
-    if subreddit['use_existing_data']:
-        submissions[name] = pd.read_csv(subreddit['submissions_data_path'])
-    else:
-        submissions[name] = reddit_data.submissions(api_instance=api_praw,
-                                                    target_subreddit=name,
-                                                    before=int(datetime.strptime(subreddit['before'], '%m/%d/%Y').timestamp()),
-                                                    after=int(datetime.strptime(subreddit['after'], '%m/%d/%Y').timestamp()),
-                                                    write_data=write_data)
+# # Define the subreddits and dates that this analysis will target
+# with open(r'Config/subreddits.json') as subreddit_json:
+#     target_subreddits = json.load(subreddit_json)['subreddits']
+#
+# # Boolean to control if data is written to disk
+# write_data = True
+#
+# # Flag to use existing datasets or to pull new ones
+# use_existing_data = True
+#
+# # Get all submissions for the target subreddits
+# submissions = {}
+# for subreddit in target_subreddits:
+#     name = subreddit['subreddit']
+#     if subreddit['use_existing_data']:
+#         submissions[name] = pd.read_csv(subreddit['submissions_data_path'])
+#     else:
+#         submissions[name] = reddit_data.submissions(api_instance=api_praw,
+#                                                     target_subreddit=name,
+#                                                     before=int(datetime.strptime(subreddit['before'], '%m/%d/%Y').timestamp()),
+#                                                     after=int(datetime.strptime(subreddit['after'], '%m/%d/%Y').timestamp()),
+#                                                     write_data=write_data)
 
 
 def term_frequency(text: Union[pd.DataFrame, np.ndarray], target_words: list[str], target_columns=None):
@@ -61,7 +62,8 @@ def term_frequency(text: Union[pd.DataFrame, np.ndarray], target_words: list[str
     return results
 
 
-def privacy_keywords(text: Union[pd.DataFrame, np.ndarray], subreddit: str, reddit_data_type, target_columns=None):
+def privacy_keywords(text: Union[pd.DataFrame, np.ndarray], subreddit: str, reddit_data_type, target_columns=None,
+                     write_data=True, file_name_modifier=''):
     # TODO - Refactor. This does not feel like it is implemented cleanly
     with open(r'Config/analysis_settings.json') as json_file:
         settings = json.load(json_file)
@@ -79,7 +81,6 @@ def privacy_keywords(text: Union[pd.DataFrame, np.ndarray], subreddit: str, redd
         pass
 
     if write_data:
-        keywords_df.to_csv(r'Outputs\%s_%s_privacy_keywords.csv' % (subreddit, reddit_data_type))
         keywords_df.to_csv(r'Outputs\%s_%s%s_privacy_keywords.csv' % (subreddit, reddit_data_type, file_name_modifier))
 
     return keywords_df
@@ -130,6 +131,45 @@ def tag_submissions(submission_file: str):
     df_to_tag["body_CCPA_flag"]  = np.where(df_to_tag.selftext.str.contains(ccpa_check,flags=re.IGNORECASE, regex=True),1,0)
     
     return df_to_tag
+
+
+def privacy_submissions(submission_file: str):
+    df_tagged = tag_submissions(submission_file)
+    privacy_df = df_tagged[(df_tagged["title_privacy_flag"] == 1) |
+                           (df_tagged["title_GDPR_flag"] == 1) |
+                           (df_tagged["title_CCPA_flag"] == 1) |
+                           (df_tagged["body_privacy_flag"] == 1) |
+                           (df_tagged["body_GDPR_flag"] == 1) |
+                           (df_tagged["body_CCPA_flag"] == 1)].copy()
+
+    return privacy_df
+
+
+def privacy_questions(submission_file: str):
+    privacy_df = privacy_submissions(submission_file)
+    posts = corpus.nps_chat.xml_posts()[:10000]
+
+    def dialogue_act_features(post):
+        features = {}
+        for word in word_tokenize(post):
+            features['contains({})'.format(word.lower())] = True
+        return features
+
+    feature_sets = [(dialogue_act_features(post.text), post.get('class')) for post in posts]
+    size = int(len(feature_sets) * 0.1)
+    train_set, test_set = feature_sets[size:], feature_sets[:size]
+    classifier = NaiveBayesClassifier.train(train_set)
+    privacy_df['title'] = privacy_df['title'].apply(lambda x: remove_emoji(x))
+    privacy_df['title_feature_set'] = privacy_df['title'].apply(lambda x: dialogue_act_features(x))
+    privacy_df['title_dialogue_act_type'] = privacy_df['title_feature_set'].apply(lambda x: classifier.classify(x))
+
+    privacy_df['selftext'] = privacy_df['selftext'].astype(str)
+    privacy_df['selftext'] = privacy_df['selftext'].apply(lambda x: remove_emoji(x))
+    privacy_df['selftext_feature_set'] = privacy_df['selftext'].apply(lambda x: dialogue_act_features(x))
+    privacy_df['selftext_dialogue_act_type'] = privacy_df['selftext_feature_set'].apply(lambda x: classifier.classify(x))
+
+    return privacy_df[privacy_df['title_dialogue_act_type'].str.contains('Question', regex=True) |
+                      privacy_df['selftext_dialogue_act_type'].str.contains('Question', regex=True)].copy()
 
 
 def submissions_sentiment_analysis(submission_file: str):

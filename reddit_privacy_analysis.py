@@ -80,6 +80,7 @@ def privacy_keywords(text: Union[pd.DataFrame, np.ndarray], subreddit: str, redd
 
     if write_data:
         keywords_df.to_csv(r'Outputs\%s_%s_privacy_keywords.csv' % (subreddit, reddit_data_type))
+        keywords_df.to_csv(r'Outputs\%s_%s%s_privacy_keywords.csv' % (subreddit, reddit_data_type, file_name_modifier))
 
     return keywords_df
 

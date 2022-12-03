@@ -234,9 +234,27 @@ def overall_analysis(df_to_analyze):
     gdpr_date = datetime(2016, 4, 20)
     ccpa_date = datetime(2018, 6, 28)
     
-    privacy_df = df_to_count.loc[(df_to_count["title_privacy_flag"] == 1) | (df_to_count["body_privacy_flag"] == 1)].copy()
+    privacy_df = df_to_analyze.loc[(df_to_analyze["title_privacy_flag"] == 1) | (df_to_analyze["body_privacy_flag"] == 1)].copy()
+    privacy_df = privacy_df[["created_utc", "title_sentiment"]].copy()
+    privacy_df.set_index("created_utc", inplace=True)
+    privacy_df_monthly_sentiment = privacy_df.groupby(pd.Grouper(freq="M")).apply(lambda x: pd.Series(dict(Total_Positive=(x.title_sentiment == 'Positive').sum(),
+                                                                                                       Total_Neutral=(x.title_sentiment == 'Neutral').sum(),
+                                                                                                       Total_Negative=(x.title_sentiment == 'Negative').sum())))
+    privacy_df_monthly_sentiment["total"] = privacy_df_monthly_sentiment.sum(axis=1)
+    privacy_df_monthly_sentiment["Total_Positive"] = privacy_df_monthly_sentiment["Total_Positive"]/privacy_df_monthly_sentiment["total"]
+    privacy_df_monthly_sentiment["Total_Neutral"] = privacy_df_monthly_sentiment["Total_Neutral"]/privacy_df_monthly_sentiment["total"]
+    privacy_df_monthly_sentiment["Total_Negative"] = privacy_df_monthly_sentiment["Total_Negative"]/privacy_df_monthly_sentiment["total"]
+    privacy_df_monthly_sentiment.drop(columns="total", inplace=True)
     
-    privacy_df_monthly = 
+    # TODO: May want to plot total posts as a secondary axes for context?
+    plt.figure()
+    privacy_df_monthly_sentiment.plot()
+    plt.axvline(gdpr_date, color="black", label="GDPR")
+    plt.axvline(ccpa_date, color="black", label="CCPA")
+    plt.text(gdpr_date, .9, "GDPR")
+    plt.text(ccpa_date, .9, "CCPA")
+    
+    return privacy_df_monthly_sentiment
 
 
 if __name__ == "__main__":

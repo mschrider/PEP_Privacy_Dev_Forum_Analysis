@@ -12,7 +12,7 @@ import heapq
 from collections import Counter
 from nltk.sentiment.vader import SentimentIntensityAnalyzer as SIA
 from nltk.stem import WordNetLemmatizer
-from nltk import tokenize, corpus, word_tokenize, NaiveBayesClassifier
+from nltk import tokenize, corpus, word_tokenize, NaiveBayesClassifier, ngrams
 # from wordcloud import WordCloud, STOPWORDS
 
 # This line looks for a praw.ini config file in your working directory; See the config section of the readme for details
@@ -198,7 +198,8 @@ def clean_submission(df_to_clean):
     df_to_clean.selftext.fillna('', inplace=True)
     df_to_clean.selftext.astype("string")
     df_to_clean["cleaned_selftext"] = df_to_clean.selftext.apply(remove_emoji)
-    df_to_clean["cleaned_selftext"].loc[df_to_clean["cleaned_selftext"] == '[deleted]'] = ''
+    df_to_clean = df_to_clean.loc[(df_to_clean["cleaned_selftext"] != '[deleted]')
+                                  | (df_to_clean["cleaned_selftext"] != '[removed]')]
 
     return df_to_clean
 
@@ -239,6 +240,28 @@ def token_lemmat_prep(df_to_prep):
     return df_to_prep
 
 
+def privacy_word_phrase_freq(tokenized_list: list):
+    
+    with open(r'Config/analysis_settings.json') as json_file:
+        settings = json.load(json_file)
+    target_privacy_keywords = settings['privacy_keywords']
+    
+    token_privacy_key_phrases = [tuple(tokenize.word_tokenize(phrase)) for phrase in target_privacy_keywords]
+    tuples_token_priv_key_phrases = [(x) for x in token_privacy_key_phrases]
+    
+    word_phrase_freq = dict.fromkeys(tuples_token_priv_key_phrases, 0)
+    
+    word_phrase_freq_prep = list()
+    for size in 1, 2, 3, 4:
+        word_phrase_freq_prep.append(FreqDist(ngrams(tokenized_list, size)))
+    
+    for freq in word_phrase_freq_prep:
+        for key, value in freq.items():
+            if key in word_phrase_freq.keys():
+                word_phrase_freq[key] += value
+        
+    return word_phrase_freq
+
 def remove_emoji(string):
     emoji_pattern = re.compile("["
                            u"\U0001F600-\U0001F64F"  # emoticons
@@ -251,53 +274,97 @@ def remove_emoji(string):
     return emoji_pattern.sub(r'', string)
 
 
+# def word_frequency_analysis_old(df_to_count):
+#     with open(r'Config/analysis_settings.json') as json_file:
+#         settings = json.load(json_file)
+#     target_privacy_keywords = settings['privacy_keywords']
+    
+#     privacy_df = df_to_count.loc[(df_to_count["title_privacy_flag"] == 1) | (df_to_count["body_privacy_flag"] == 1)].copy()
+    
+#     title_lists = privacy_df.lemmatized_title.to_list()
+#     title_words = [word for x in title_lists for word in x if word.isalnum()]
+#     # Privacy only version
+#     privacy_title_words = [word for word in title_words if word.lower() in target_privacy_keywords]
+    
+#     body_lists = privacy_df.lemmatized_body.to_list()
+#     body_words = [word for x in body_lists for word in x if word.isalnum()]
+#     # Privacy only version
+#     privacy_body_words = [word for word in body_words if word.lower() in target_privacy_keywords]
+    
+#     title_word_freq = FreqDist(title_words)
+#     title_word_freq.plot(25, cumulative=False, title="Title Word Freq")
+#     body_word_freq = FreqDist(body_words)
+#     body_word_freq.plot(25, cumulative=False, title="Body Word Freq")
+    
+#     privacy_title_word_freq = FreqDist(privacy_title_words)
+#     privacy_title_word_freq.plot(25, cumulative=False, title="Privacy Title Word Freq")
+#     privacy_body_word_freq = FreqDist(privacy_body_words)
+#     privacy_body_word_freq.plot(25, cumulative=False, title="Privacy Body Word Freq")
+    
+#     # title_word_freq_dict = dict(title_word_freq)
+#     # body_word_freq_dict = dict(body_word_freq)
+#     privacy_title_word_freq_dict = dict(privacy_title_word_freq)
+#     privacy_body_word_freq_dict = dict(privacy_body_word_freq)
+    
+#     top_2_title_words = heapq.nlargest(2,
+#                                        privacy_title_word_freq_dict,
+#                                        key=privacy_title_word_freq_dict.get)
+#     top_2_body_words = heapq.nlargest(2,
+#                                       privacy_body_word_freq_dict,
+#                                       key=privacy_body_word_freq_dict.get)
+    
+#     privacy_df["num_top_words_title"] = privacy_df.lemmatized_title.apply(lambda lst: lst.count(top_2_title_words[0]) + lst.count(top_2_title_words[1]))
+#     privacy_df["num_top_words_body"] = privacy_df.lemmatized_body.apply(lambda lst: lst.count(top_2_body_words[0]) + lst.count(top_2_body_words[1]))
+    
+    
+#     return privacy_df
+
 def word_frequency_analysis(df_to_count):
     with open(r'Config/analysis_settings.json') as json_file:
         settings = json.load(json_file)
     target_privacy_keywords = settings['privacy_keywords']
     
+    token_privacy_key_phrases = [tuple(tokenize.word_tokenize(phrase)) for phrase in target_privacy_keywords]
+    tuples_token_priv_key_phrases = [(x) for x in token_privacy_key_phrases]
+    
+    word_phrase_freq = dict.fromkeys(tuples_token_priv_key_phrases, 0)
+    
     privacy_df = df_to_count.loc[(df_to_count["title_privacy_flag"] == 1) | (df_to_count["body_privacy_flag"] == 1)].copy()
     
-    title_lists = privacy_df.lemmatized_title.to_list()
-    title_words = [word for x in title_lists for word in x if word.isalnum()]
-    # Privacy only version
-    privacy_title_words = [word for word in title_words if word.lower() in target_privacy_keywords]
+    privacy_df["title_word_freq"] = privacy_df["lemmatized_title"].apply(privacy_word_phrase_freq)
+    privacy_df["body_word_freq"] = privacy_df["lemmatized_body"].apply(privacy_word_phrase_freq)
     
-    body_lists = privacy_df.lemmatized_body.to_list()
-    body_words = [word for x in body_lists for word in x if word.isalnum()]
-    # Privacy only version
-    privacy_body_words = [word for word in body_words if word.lower() in target_privacy_keywords]
+    list_title_word_freq = privacy_df["title_word_freq"].to_list()
+    list_body_word_freq = privacy_df["body_word_freq"].to_list()
     
-    title_word_freq = FreqDist(title_words)
-    title_word_freq.plot(25, cumulative=False, title="Title Word Freq")
-    body_word_freq = FreqDist(body_words)
-    body_word_freq.plot(25, cumulative=False, title="Body Word Freq")
+    title_word_freq = dictionary_key_sum(list_title_word_freq, word_phrase_freq.copy())
+    body_word_freq = dictionary_key_sum(list_body_word_freq, word_phrase_freq.copy())
     
-    privacy_title_word_freq = FreqDist(privacy_title_words)
-    privacy_title_word_freq.plot(25, cumulative=False, title="Privacy Title Word Freq")
-    privacy_body_word_freq = FreqDist(privacy_body_words)
-    privacy_body_word_freq.plot(25, cumulative=False, title="Privacy Body Word Freq")
+    title_freq_dist = FreqDist()
+    for word, freq in title_word_freq.items():
+        title_freq_dist[' '.join(word)] = freq
+        
+    body_freq_dist = FreqDist()
+    for word, freq in body_word_freq.items():
+        body_freq_dist[' '.join(word)] = freq
     
-    # title_word_freq_dict = dict(title_word_freq)
-    # body_word_freq_dict = dict(body_word_freq)
-    privacy_title_word_freq_dict = dict(privacy_title_word_freq)
-    privacy_body_word_freq_dict = dict(privacy_body_word_freq)
-    
-    top_2_title_words = heapq.nlargest(2,
-                                       privacy_title_word_freq_dict,
-                                       key=privacy_title_word_freq_dict.get)
-    top_2_body_words = heapq.nlargest(2,
-                                      privacy_body_word_freq_dict,
-                                      key=privacy_body_word_freq_dict.get)
-    
-    privacy_df["num_top_words_title"] = privacy_df.lemmatized_title.apply(lambda lst: lst.count(top_2_title_words[0]) + lst.count(top_2_title_words[1]))
-    privacy_df["num_top_words_body"] = privacy_df.lemmatized_body.apply(lambda lst: lst.count(top_2_body_words[0]) + lst.count(top_2_body_words[1]))
-    
-    
-    return privacy_df
-    
+    title_freq_dist.plot(10, cumulative=False, title="Title Word Freq", )
+    body_freq_dist.plot(10, cumulative=False, title="Body Word Freq")
 
-def overall_analysis(df_to_analyze):
+   
+    return
+
+def dictionary_key_sum(list_of_dicts: list, target_dict: dict = dict()):
+    for dct in list_of_dicts:
+        for key, value in dct.items():
+            if key in target_dict.keys():
+                target_dict[key] += value
+            else:
+                target_dict[key] = value
+    
+    return target_dict
+
+def sentiment_graphing(df_to_analyze):
     
     gdpr_date = datetime(2016, 4, 20)
     ccpa_date = datetime(2018, 6, 28)
@@ -356,9 +423,10 @@ def overall_analysis(df_to_analyze):
 
 if __name__ == "__main__":
     start = time.perf_counter()
-    submission_file = 'Data/iOSProgramming_submissions_raw_data.zip'
+    submission_file = 'Data/iosdev_submissions_raw_data.zip'
     
     test_df = pd.read_csv(submission_file)
+    # TODO: May not want to limit it to these columns
     test_df = test_df[["subreddit", "selftext", "gilded", "title", "upvote_ratio", "created_utc"]]
     
     test_df = clean_submission(test_df)
@@ -368,6 +436,6 @@ if __name__ == "__main__":
     end = time.perf_counter()
     print('Time to preprocess: %f' % (end - start))
     
-    test_df = word_frequency_analysis(test_df)
+    word_frequency_analysis(test_df)
     
-    overall_analysis(test_df)
+    sentiment_graphing(test_df)

@@ -337,19 +337,19 @@ def word_frequency_analysis(df_to_count):
     list_title_word_freq = privacy_df["title_word_freq"].to_list()
     list_body_word_freq = privacy_df["body_word_freq"].to_list()
     
-    title_word_freq = dictionary_key_sum(list_title_word_freq, word_phrase_freq)
-    body_word_freq = dictionary_key_sum(list_body_word_freq, word_phrase_freq)
+    title_word_freq = dictionary_key_sum(list_title_word_freq, word_phrase_freq.copy())
+    body_word_freq = dictionary_key_sum(list_body_word_freq, word_phrase_freq.copy())
     
     title_freq_dist = FreqDist()
     for word, freq in title_word_freq.items():
-        title_freq_dist[word] = freq
+        title_freq_dist[' '.join(word)] = freq
         
     body_freq_dist = FreqDist()
     for word, freq in body_word_freq.items():
-        body_freq_dist[word] = freq
+        body_freq_dist[' '.join(word)] = freq
     
-    title_freq_dist.plot(15, cumulative=False, title="Title Word Freq")
-    body_freq_dist.plot(15, cumulative=False, title="Body Word Freq")
+    title_freq_dist.plot(10, cumulative=False, title="Title Word Freq", )
+    body_freq_dist.plot(10, cumulative=False, title="Body Word Freq")
 
    
     return

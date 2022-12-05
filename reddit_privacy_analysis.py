@@ -380,14 +380,14 @@ def sentiment_graphing(df_to_analyze):
     subreddit = df_to_analyze['subreddit'].iloc[0]
     
     privacy_df = df_to_analyze.loc[(df_to_analyze["title_privacy_flag"] == 1) | (df_to_analyze["body_privacy_flag"] == 1)].copy()
-    privacy_df = privacy_df[["created_utc", "title_sentiment", "body_sentiment"]].copy()
+    privacy_df = privacy_df[["created_utc", "titlesentiment", "bodysentiment"]].copy()
     privacy_df.set_index("created_utc", inplace=True)
-    privacy_df_monthly_sentiment = privacy_df.groupby(pd.Grouper(freq="M")).apply(lambda x: pd.Series(dict(Percent_Positive_Title=(x.title_sentiment == 'Positive').sum(),
-                                                                                                           Percent_Neutral_Title=(x.title_sentiment == 'Neutral').sum(),
-                                                                                                           Percent_Negative_Title=(x.title_sentiment == 'Negative').sum(),
-                                                                                                           Percent_Positive_Body=(x.body_sentiment == 'Positive').sum(),
-                                                                                                           Percent_Neutral_Body=(x.body_sentiment == 'Neutral').sum(),
-                                                                                                           Percent_Negative_Body=(x.body_sentiment == 'Negative').sum())))
+    privacy_df_monthly_sentiment = privacy_df.groupby(pd.Grouper(freq="M")).apply(lambda x: pd.Series(dict(Percent_Positive_Title=(x.titlesentiment == 'Positive').sum(),
+                                                                                                           Percent_Neutral_Title=(x.titlesentiment == 'Neutral').sum(),
+                                                                                                           Percent_Negative_Title=(x.titlesentiment == 'Negative').sum(),
+                                                                                                           Percent_Positive_Body=(x.bodysentiment == 'Positive').sum(),
+                                                                                                           Percent_Neutral_Body=(x.bodysentiment == 'Neutral').sum(),
+                                                                                                           Percent_Negative_Body=(x.bodysentiment == 'Negative').sum())))
     
     privacy_df_monthly_sentiment["title_total"] = privacy_df_monthly_sentiment[["Percent_Positive_Title", "Percent_Neutral_Title", "Percent_Negative_Title"]].sum(axis=1)
     privacy_df_monthly_sentiment["body_total"] = privacy_df_monthly_sentiment[["Percent_Positive_Body", "Percent_Neutral_Body", "Percent_Negative_Body"]].sum(axis=1)
@@ -406,7 +406,10 @@ def sentiment_graphing(df_to_analyze):
     # TODO: May want to plot total posts as a secondary axes for context?
     fig, (ax1, ax2) = plt.subplots(2,1)
     fig.suptitle("%s Sentiment Percentage Over Time" % subreddit)
-    privacy_df_monthly_sentiment[["Percent_Positive_Title", "Percent_Neutral_Title", "Percent_Negative_Title"]].plot(ax=ax1)
+    privacy_df_monthly_sentiment[["Percent_Positive_Title", "Percent_Neutral_Title", "Percent_Negative_Title"]].plot(ax=ax1,
+                                                                                                                     style={'Percent_Positive_Title': 'g',
+                                                                                                                            'Percent_Neutral_Title': 'b',
+                                                                                                                            'Percent_Negative_Title': 'r'})
     ax1.axvline(gdpr_date, color="black", label="GDPR")
     ax1.axvline(ccpa_date, color="black", label="CCPA")
     ax1.text(gdpr_date, title_max*.9, "GDPR")
@@ -416,7 +419,10 @@ def sentiment_graphing(df_to_analyze):
                bbox_to_anchor=(1.4, 1),
                loc=1,
                ncol=1)
-    privacy_df_monthly_sentiment[["Percent_Positive_Body", "Percent_Neutral_Body", "Percent_Negative_Body"]].plot(ax=ax2)
+    privacy_df_monthly_sentiment[["Percent_Positive_Body", "Percent_Neutral_Body", "Percent_Negative_Body"]].plot(ax=ax2,
+                                                                                                                     style={'Percent_Positive_Body': 'g',
+                                                                                                                            'Percent_Neutral_Body': 'b',
+                                                                                                                            'Percent_Negative_Body': 'r'})
     ax2.axvline(gdpr_date, color="black", label="GDPR")
     ax2.axvline(ccpa_date, color="black", label="CCPA")
     ax2.text(gdpr_date, body_max*.9, "GDPR")
@@ -448,7 +454,7 @@ def topic_analysis(tokenized_lemma_df: pd.DataFrame, target_lemma_token_columns:
 
 if __name__ == "__main__":
     start = time.perf_counter()
-    submission_file = 'Data/webdev_submissions_raw_data.zip'
+    submission_file = 'Data/iOSProgramming_submissions_raw_data.zip'
     
     test_df = pd.read_csv(submission_file)
     # TODO: May not want to limit it to these columns
@@ -467,4 +473,4 @@ if __name__ == "__main__":
     privacy_topics = topic_analysis(topic_df, ['lemmatized_title', 'lemmatized_body'])
     word_frequency_analysis(test_df, 'webdev')
     
-    # sentiment_graphing(test_df)
+    sentiment_graphing(test_df)

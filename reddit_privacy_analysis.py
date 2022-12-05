@@ -21,9 +21,11 @@ from nltk import tokenize, corpus, word_tokenize, NaiveBayesClassifier, ngrams
 # print('Connected as: %s' % reddit.user.me())
 from nltk import tokenize
 from nltk import RegexpTokenizer
-from nltk.corpus import stopwords
+from nltk.corpus import stopwords, wordnet
 from nltk.probability import FreqDist
 import time
+from matplotlib import pylab
+import gensim
 
 # # This line looks for a praw.ini config file in your working directory; See the config section of the readme for details
 # reddit = praw.Reddit()
@@ -66,6 +68,12 @@ import time
 #                                                     write_data=write_data)
 
 
+def get_privacy_keywords():
+    with open(r'Config/analysis_settings.json') as json_file:
+        settings = json.load(json_file)
+    return settings['privacy_keywords']
+
+
 def term_frequency(text: Union[pd.DataFrame, np.ndarray], target_words: list[str], target_columns=None):
     if target_columns is None:
         if type(text) == pd.DataFrame:
@@ -85,12 +93,8 @@ def term_frequency(text: Union[pd.DataFrame, np.ndarray], target_words: list[str
 
 def privacy_keywords(text: Union[pd.DataFrame, np.ndarray], subreddit: str, reddit_data_type, target_columns=None,
                      write_data=True, file_name_modifier=''):
-    # TODO - Refactor. This does not feel like it is implemented cleanly
-    with open(r'Config/analysis_settings.json') as json_file:
-        settings = json.load(json_file)
-    target_privacy_keywords = settings['privacy_keywords']
 
-    keywords_df = pd.DataFrame(term_frequency(text, target_privacy_keywords, target_columns=target_columns))
+    keywords_df = pd.DataFrame(term_frequency(text, get_privacy_keywords(), target_columns=target_columns))
     if reddit_data_type == 'submissions':
         keywords_df.rename(columns={'target_word': 'Privacy Keyword',
                                     'target_column': 'Search Location',
@@ -98,8 +102,11 @@ def privacy_keywords(text: Union[pd.DataFrame, np.ndarray], subreddit: str, redd
                                     'total_number_of_rows': 'Number of Submissions Searched'},
                            inplace=True)
     else:
-        # TODO - Implement for comments
-        pass
+        keywords_df.rename(columns={'target_word': 'Privacy Keyword',
+                                    'target_column': 'Search Location',
+                                    'number_of_occurrences': 'Number of Occurrences',
+                                    'total_number_of_rows': 'Number of Comments Searched'},
+                           inplace=True)
 
     if write_data:
         keywords_df.to_csv(r'Outputs\%s_%s%s_privacy_keywords.csv' % (subreddit, reddit_data_type, file_name_modifier))
@@ -133,41 +140,48 @@ def privacy_keywords(text: Union[pd.DataFrame, np.ndarray], subreddit: str, redd
 #     plt.show()
 
 
-def tag_submissions(df_to_tag):
-    
-    with open(r'Config/analysis_settings.json') as json_file:
-        settings = json.load(json_file)
-    target_privacy_keywords = settings['privacy_keywords']
-    regex_privacy_list = '|'.join(target_privacy_keywords)
-    
+def get_privacy_tags():
+    regex_privacy_list = '|'.join(get_privacy_keywords())
     gdpr_check = 'GDPR|General Data Protection Regulation'
     ccpa_check = 'CCPA|CCPR|California Consumer Privacy Act|California Consumer Privacy Regulation'
-    
-    df_to_tag["title_privacy_flag"]  = np.where(df_to_tag.title.str.contains(regex_privacy_list, flags=re.IGNORECASE, regex=True),1,0)
-    df_to_tag["title_GDPR_flag"]  = np.where(df_to_tag.title.str.contains(gdpr_check, flags=re.IGNORECASE, regex=True),1,0)
-    df_to_tag["title_CCPA_flag"]  = np.where(df_to_tag.title.str.contains(ccpa_check, flags=re.IGNORECASE, regex=True),1,0)
-    
-    df_to_tag["body_privacy_flag"]  = np.where(df_to_tag.cleaned_selftext.str.contains(regex_privacy_list, flags=re.IGNORECASE, regex=True),1,0)
-    df_to_tag["body_GDPR_flag"]  = np.where(df_to_tag.cleaned_selftext.str.contains(gdpr_check, flags=re.IGNORECASE, regex=True),1,0)
-    df_to_tag["body_CCPA_flag"]  = np.where(df_to_tag.cleaned_selftext.str.contains(ccpa_check, flags=re.IGNORECASE, regex=True),1,0)
-    
+
+    tags = [{'suffix': '_privacy_flag', 'regex': regex_privacy_list},
+            {'suffix': '_GDPR_flag', 'regex': gdpr_check},
+            {'suffix': '_CCPA_flag', 'regex': ccpa_check}]
+    return tags
+
+
+def tag_reddit_data(df_to_tag: pd.DataFrame, target_columns: list[str]):
+    for column in target_columns:
+        for tag in get_privacy_tags():
+            df_to_tag[column + tag['suffix']] = df_to_tag[column].str.contains(tag['regex'],
+                                                                               flags=re.IGNORECASE, regex=True)
     return df_to_tag
 
 
-def privacy_submissions(submission_file: str):
-    df_tagged = tag_submissions(submission_file)
-    privacy_df = df_tagged[(df_tagged["title_privacy_flag"] == 1) |
-                           (df_tagged["title_GDPR_flag"] == 1) |
-                           (df_tagged["title_CCPA_flag"] == 1) |
-                           (df_tagged["body_privacy_flag"] == 1) |
-                           (df_tagged["body_GDPR_flag"] == 1) |
-                           (df_tagged["body_CCPA_flag"] == 1)].copy()
+def privacy_submissions(tagged_df: pd.DataFrame):
 
-    return privacy_df
+    columns = list(tagged_df.columns)
+    privacy_suffixes = {tag['suffix'] for tag in get_privacy_tags()}
+    tagged_columns = []
+
+    for column in columns:
+        for privacy_suffix in privacy_suffixes:
+            if privacy_suffix in str(column):
+                tagged_columns.append(str(column))
+
+    if not tagged_columns:
+        raise ValueError('No columns were tagged as privacy relevant. Run "tag_reddit_data" function.')
+
+    tagged_df['privacy_flagged'] = False
+    for tagged_column in tagged_columns:
+        tagged_df['privacy_flagged'] = tagged_df['privacy_flagged'] | tagged_df[tagged_column]
+
+    return tagged_df[tagged_df['privacy_flagged']].copy()
 
 
-def privacy_questions(submission_file: str):
-    privacy_df = privacy_submissions(submission_file)
+def privacy_questions(tagged_df: pd.DataFrame, columns_for_classification: list[str]):
+    privacy_df = privacy_submissions(tagged_df)
     posts = corpus.nps_chat.xml_posts()[:10000]
 
     def dialogue_act_features(post):
@@ -180,17 +194,17 @@ def privacy_questions(submission_file: str):
     size = int(len(feature_sets) * 0.1)
     train_set, test_set = feature_sets[size:], feature_sets[:size]
     classifier = NaiveBayesClassifier.train(train_set)
-    privacy_df['title'] = privacy_df['title'].apply(lambda x: remove_emoji(x))
-    privacy_df['title_feature_set'] = privacy_df['title'].apply(lambda x: dialogue_act_features(x))
-    privacy_df['title_dialogue_act_type'] = privacy_df['title_feature_set'].apply(lambda x: classifier.classify(x))
 
-    privacy_df['selftext'] = privacy_df['selftext'].astype(str)
-    privacy_df['selftext'] = privacy_df['selftext'].apply(lambda x: remove_emoji(x))
-    privacy_df['selftext_feature_set'] = privacy_df['selftext'].apply(lambda x: dialogue_act_features(x))
-    privacy_df['selftext_dialogue_act_type'] = privacy_df['selftext_feature_set'].apply(lambda x: classifier.classify(x))
+    privacy_df['Question_Flag'] = False
+    for column in columns_for_classification:
+        privacy_df[column] = privacy_df[column].astype(str)
+        privacy_df[column] = privacy_df[column].apply(remove_emoji)
+        privacy_df[column + '_feature_set'] = privacy_df[column].apply(dialogue_act_features)
+        privacy_df[column + '_dialogue_act_type'] = privacy_df[column].apply(classifier.classify)
+        privacy_df['Question_Flag'] = privacy_df['Question_Flag'] |\
+                                      privacy_df[column + '_dialogue_act_type'].str.contains('Question', regex=True)
 
-    return privacy_df[privacy_df['title_dialogue_act_type'].str.contains('Question', regex=True) |
-                      privacy_df['selftext_dialogue_act_type'].str.contains('Question', regex=True)].copy()
+    return privacy_df[privacy_df['Question_Flag']].copy()
 
 
 def clean_submission(df_to_clean):
@@ -200,53 +214,40 @@ def clean_submission(df_to_clean):
     df_to_clean["cleaned_selftext"] = df_to_clean.selftext.apply(remove_emoji)
     df_to_clean = df_to_clean.loc[(df_to_clean["cleaned_selftext"] != '[deleted]')
                                   | (df_to_clean["cleaned_selftext"] != '[removed]')]
+    df_to_clean.rename(columns={'cleaned_selftext': 'body'}, inplace=True)
 
-    return df_to_clean
+    return df_to_clean.copy()
 
 
-def submissions_sentiment_analysis(df_sentiment):
+def submissions_sentiment_analysis(df_sentiment: pd.DataFrame, columns_to_analyze: list[str],
+                                   neutrality_width: float = 0.1):
     sid_obj = SIA()
-    
-    df_sentiment["title_sentiment_polarity_scores"] = df_sentiment.title.apply(sid_obj.polarity_scores)
-    # TODO: Using 0.1 as a baseline for neutrality, may want to do some reviewing and tweaking
-    df_sentiment["title_sentiment"] = np.where(df_sentiment.title_sentiment_polarity_scores.apply(lambda x: x.get('compound')) >= 0.1, 'Positive', np.where(
-        df_sentiment.title_sentiment_polarity_scores.apply(lambda x: x.get('compound')) <= -0.1, 'Negative', 'Neutral'))
-    
-    df_sentiment["body_sentiment_polarity_scores"] = df_sentiment.cleaned_selftext.apply(sid_obj.polarity_scores)
-    # TODO: Using 0.1 as a baseline for neutrality, may want to do some reviewing and tweaking
-    df_sentiment["body_sentiment"] = np.where(df_sentiment.body_sentiment_polarity_scores.apply(lambda x: x.get('compound')) >= 0.1, 'Positive', np.where(
-        df_sentiment.body_sentiment_polarity_scores.apply(lambda x: x.get('compound')) <= -0.1, 'Negative', 'Neutral'))
-    
+    for column in columns_to_analyze:
+        df_sentiment[column + '_sentiment_polarity_scores'] = df_sentiment[column].apply(sid_obj.polarity_scores)
+        df_sentiment[column + '_compound_score'] = df_sentiment[column + '_sentiment_polarity_scores'].apply(lambda x: x.get('compound'))
+        df_sentiment[column + 'sentiment'] = np.where(df_sentiment[column + '_compound_score'] >= neutrality_width, 'Positive',
+                                                      np.where(df_sentiment[column + '_compound_score'] <= -neutrality_width, 'Negative', 'Neutral'))
     return df_sentiment
 
 
-def token_lemmat_prep(df_to_prep):
-    
+def token_lemmat_prep(df_to_prep: pd.DataFrame, target_columns: list[str]):
     lemmatizer = WordNetLemmatizer()
     stop_words = stopwords.words('english')
     # TODO: Remove punctuation here or do it when doing word freq analysis?
     # tokenizer = RegexpTokenizer(r"\w+")
-    
-    df_to_prep["lemmatized_title"] = df_to_prep.title.str.lower()
-    df_to_prep["lemmatized_title"] = df_to_prep.lemmatized_title.apply(tokenize.word_tokenize)
-    df_to_prep["lemmatized_title"] = df_to_prep.lemmatized_title.apply(lambda lst: [word for word in lst if word not in stop_words])
-    df_to_prep["lemmatized_title"] = df_to_prep.lemmatized_title.apply(lambda lst: [lemmatizer.lemmatize(word) for word in lst])
-    
-    df_to_prep["lemmatized_body"] = df_to_prep.cleaned_selftext.str.lower()
-    df_to_prep["lemmatized_body"] = df_to_prep.lemmatized_body.apply(tokenize.word_tokenize)
-    df_to_prep["lemmatized_body"] = df_to_prep.lemmatized_body.apply(lambda lst: [word for word in lst if word not in stop_words])
-    df_to_prep["lemmatized_body"] = df_to_prep.lemmatized_body.apply(lambda lst: [lemmatizer.lemmatize(word) for word in lst])
-    
+
+    for column in target_columns:
+        lemmatized_column = 'lemmatized_' + column
+        df_to_prep[lemmatized_column] = df_to_prep[column].str.lower()
+        df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(tokenize.word_tokenize)
+        df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(lambda lst: [word for word in lst if word not in stop_words])
+        df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(lambda lst: [lemmatizer.lemmatize(word) for word in lst])
+
     return df_to_prep
 
 
 def privacy_word_phrase_freq(tokenized_list: list):
-    
-    with open(r'Config/analysis_settings.json') as json_file:
-        settings = json.load(json_file)
-    target_privacy_keywords = settings['privacy_keywords']
-    
-    token_privacy_key_phrases = [tuple(tokenize.word_tokenize(phrase)) for phrase in target_privacy_keywords]
+    token_privacy_key_phrases = [tuple(tokenize.word_tokenize(phrase)) for phrase in get_privacy_keywords()]
     tuples_token_priv_key_phrases = [(x) for x in token_privacy_key_phrases]
     
     word_phrase_freq = dict.fromkeys(tuples_token_priv_key_phrases, 0)
@@ -261,6 +262,7 @@ def privacy_word_phrase_freq(tokenized_list: list):
                 word_phrase_freq[key] += value
         
     return word_phrase_freq
+
 
 def remove_emoji(string):
     emoji_pattern = re.compile("["
@@ -319,42 +321,48 @@ def remove_emoji(string):
     
 #     return privacy_df
 
-def word_frequency_analysis(df_to_count):
-    with open(r'Config/analysis_settings.json') as json_file:
-        settings = json.load(json_file)
-    target_privacy_keywords = settings['privacy_keywords']
-    
-    token_privacy_key_phrases = [tuple(tokenize.word_tokenize(phrase)) for phrase in target_privacy_keywords]
+
+def word_frequency_analysis(df_to_count: pd.DataFrame, subreddit: str):
+
+    token_privacy_key_phrases = [tuple(tokenize.word_tokenize(phrase)) for phrase in get_privacy_keywords()]
     tuples_token_priv_key_phrases = [(x) for x in token_privacy_key_phrases]
     
     word_phrase_freq = dict.fromkeys(tuples_token_priv_key_phrases, 0)
-    
-    privacy_df = df_to_count.loc[(df_to_count["title_privacy_flag"] == 1) | (df_to_count["body_privacy_flag"] == 1)].copy()
-    
-    privacy_df["title_word_freq"] = privacy_df["lemmatized_title"].apply(privacy_word_phrase_freq)
-    privacy_df["body_word_freq"] = privacy_df["lemmatized_body"].apply(privacy_word_phrase_freq)
-    
-    list_title_word_freq = privacy_df["title_word_freq"].to_list()
-    list_body_word_freq = privacy_df["body_word_freq"].to_list()
-    
-    title_word_freq = dictionary_key_sum(list_title_word_freq, word_phrase_freq.copy())
-    body_word_freq = dictionary_key_sum(list_body_word_freq, word_phrase_freq.copy())
-    
-    title_freq_dist = FreqDist()
-    for word, freq in title_word_freq.items():
-        title_freq_dist[' '.join(word)] = freq
-        
-    body_freq_dist = FreqDist()
-    for word, freq in body_word_freq.items():
-        body_freq_dist[' '.join(word)] = freq
-    
-    title_freq_dist.plot(10, cumulative=False, title="Title Word Freq", )
-    body_freq_dist.plot(10, cumulative=False, title="Body Word Freq")
 
-   
+    df_to_count['privacy_mask'] = False
+    privacy_flags = [str(flag) for flag in df_to_count.columns if '_privacy_flag' in str(flag)]
+    for privacy_flag in privacy_flags:
+        df_to_count['privacy_mask'] = df_to_count['privacy_mask'] | df_to_count[privacy_flag]
+    privacy_df = df_to_count[df_to_count['privacy_mask']].copy()
+
+    lemmatized_columns = [str(column) for column in privacy_df.columns if 'lemmatized_' in str(column)]
+    if not lemmatized_columns:
+        raise ValueError('Provided DataFrame does not have tokenized and lemmatized columns, prep data frame first')
+
+    frequency_distributions = {}
+    for lemmatized_column in lemmatized_columns:
+        root_column_name = lemmatized_column.replace('lemmatized_', '')
+        privacy_df[root_column_name + '_word_freq'] = privacy_df[lemmatized_column].apply(privacy_word_phrase_freq)
+        word_freq_list = privacy_df[root_column_name + '_word_freq'].to_list()
+        word_freq = dictionary_key_sum(word_freq_list, word_phrase_freq)
+        freq_dist = FreqDist()
+        for word, freq in word_freq.items():
+            freq_dist[' '.join(word)] = freq
+        frequency_distributions[root_column_name] = freq_dist.copy()
+
+    for column_name, frequency_distribution in frequency_distributions.items():
+        # NLTK uses pylab in the FreqDist.plot() method; A new figure is needed to prevent overwriting the same image
+        pylab.figure()
+        frequency_distribution.plot(10, cumulative=False, title='%s %s Word Freq' % (subreddit, column_name.title()))
+
     return
 
-def dictionary_key_sum(list_of_dicts: list, target_dict: dict = dict()):
+
+def dictionary_key_sum(list_of_dicts: list, target_dict: dict = None):
+    if target_dict is None:
+        target_dict = dict()
+    target_dict = target_dict.copy()
+
     for dct in list_of_dicts:
         for key, value in dct.items():
             if key in target_dict.keys():
@@ -363,6 +371,7 @@ def dictionary_key_sum(list_of_dicts: list, target_dict: dict = dict()):
                 target_dict[key] = value
     
     return target_dict
+
 
 def sentiment_graphing(df_to_analyze):
     
@@ -421,6 +430,15 @@ def sentiment_graphing(df_to_analyze):
     return privacy_df_monthly_sentiment
 
 
+def topic_analysis(tokenized_lemmat_df: pd.DataFrame, target_columns: list[str]):
+    lemmatized_columns = [str(column) for column in tokenized_lemmat_df.columns if 'lemmatized_' in str(column)]
+    if not lemmatized_columns:
+        raise ValueError('Provided DataFrame does not have tokenized and lemmatized columns, prep data frame first')
+
+    pass
+    return
+
+
 if __name__ == "__main__":
     start = time.perf_counter()
     submission_file = 'Data/iosdev_submissions_raw_data.zip'
@@ -428,14 +446,16 @@ if __name__ == "__main__":
     test_df = pd.read_csv(submission_file)
     # TODO: May not want to limit it to these columns
     test_df = test_df[["subreddit", "selftext", "gilded", "title", "upvote_ratio", "created_utc"]]
-    
+
+    # The "selftext" column is renamed "body" during cleaning as it is more easily understood as the body text
+    target_submission_columns = ['title', 'body']
     test_df = clean_submission(test_df)
-    test_df = tag_submissions(test_df)
-    test_df = submissions_sentiment_analysis(test_df)
-    test_df = token_lemmat_prep(test_df)
+    test_df = tag_reddit_data(test_df, target_submission_columns)
+    test_df = submissions_sentiment_analysis(test_df, target_submission_columns)
+    test_df = token_lemmat_prep(test_df, target_submission_columns)
     end = time.perf_counter()
     print('Time to preprocess: %f' % (end - start))
     
-    word_frequency_analysis(test_df)
+    word_frequency_analysis(test_df, 'iOSDev')
     
-    sentiment_graphing(test_df)
+    # sentiment_graphing(test_df)

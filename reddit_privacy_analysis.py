@@ -26,6 +26,7 @@ from nltk.probability import FreqDist
 import time
 from matplotlib import pylab
 import gensim
+import pyLDAvis
 
 # # This line looks for a praw.ini config file in your working directory; See the config section of the readme for details
 # reddit = praw.Reddit()
@@ -160,7 +161,6 @@ def tag_reddit_data(df_to_tag: pd.DataFrame, target_columns: list[str]):
 
 
 def privacy_submissions(tagged_df: pd.DataFrame):
-
     columns = list(tagged_df.columns)
     privacy_suffixes = {tag['suffix'] for tag in get_privacy_tags()}
     tagged_columns = []
@@ -200,7 +200,7 @@ def privacy_questions(tagged_df: pd.DataFrame, columns_for_classification: list[
         privacy_df[column] = privacy_df[column].astype(str)
         privacy_df[column] = privacy_df[column].apply(remove_emoji)
         privacy_df[column + '_feature_set'] = privacy_df[column].apply(dialogue_act_features)
-        privacy_df[column + '_dialogue_act_type'] = privacy_df[column].apply(classifier.classify)
+        privacy_df[column + '_dialogue_act_type'] = privacy_df[column + '_feature_set'].apply(classifier.classify)
         privacy_df['Question_Flag'] = privacy_df['Question_Flag'] |\
                                       privacy_df[column + '_dialogue_act_type'].str.contains('Question', regex=True)
 
@@ -431,7 +431,7 @@ def sentiment_graphing(df_to_analyze):
 
 
 def topic_analysis(tokenized_lemma_df: pd.DataFrame, target_lemma_token_columns: list[str], num_words=4, num_topics=10,
-                   passes=25):
+                   passes=10):
     results = {}
     for target_column in target_lemma_token_columns:
         lda_prep = 'LDA_Prep_' + target_column
@@ -448,7 +448,7 @@ def topic_analysis(tokenized_lemma_df: pd.DataFrame, target_lemma_token_columns:
 
 if __name__ == "__main__":
     start = time.perf_counter()
-    submission_file = 'Data/iosdev_submissions_raw_data.zip'
+    submission_file = 'Data/webdev_submissions_raw_data.zip'
     
     test_df = pd.read_csv(submission_file)
     # TODO: May not want to limit it to these columns
@@ -462,7 +462,9 @@ if __name__ == "__main__":
     test_df = token_lemmat_prep(test_df, target_submission_columns)
     end = time.perf_counter()
     print('Time to preprocess: %f' % (end - start))
-    
-    word_frequency_analysis(test_df, 'iOSDev')
+    topic_analysis_filters = ['gdpr', 'ccpa', 'private', 'privacy']
+    topic_df = privacy_questions(test_df, ['title'])
+    privacy_topics = topic_analysis(topic_df, ['lemmatized_title', 'lemmatized_body'])
+    word_frequency_analysis(test_df, 'webdev')
     
     # sentiment_graphing(test_df)

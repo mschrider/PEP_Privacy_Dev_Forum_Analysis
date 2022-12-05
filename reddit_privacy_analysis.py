@@ -430,13 +430,20 @@ def sentiment_graphing(df_to_analyze):
     return privacy_df_monthly_sentiment
 
 
-def topic_analysis(tokenized_lemmat_df: pd.DataFrame, target_columns: list[str]):
-    lemmatized_columns = [str(column) for column in tokenized_lemmat_df.columns if 'lemmatized_' in str(column)]
-    if not lemmatized_columns:
-        raise ValueError('Provided DataFrame does not have tokenized and lemmatized columns, prep data frame first')
+def topic_analysis(tokenized_lemma_df: pd.DataFrame, target_lemma_token_columns: list[str], num_words=4, num_topics=10,
+                   passes=25):
+    results = {}
+    for target_column in target_lemma_token_columns:
+        lda_prep = 'LDA_Prep_' + target_column
+        tokenized_lemma_df[lda_prep] = tokenized_lemma_df[target_column].apply(lambda x: [w for w in x if w.isalnum()])
+        text = tokenized_lemma_df[lda_prep].to_list()
+        dictionary = gensim.corpora.Dictionary(text)
+        corpora = [dictionary.doc2bow(token) for token in text]
+        lda_model = gensim.models.ldamodel.LdaModel(corpora, num_topics=num_topics, id2word=dictionary, passes=passes)
+        topics = lda_model.print_topics(num_words=num_words)
+        results[target_column] = [topic for topic in topics]
 
-    pass
-    return
+    return results
 
 
 if __name__ == "__main__":

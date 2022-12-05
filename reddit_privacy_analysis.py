@@ -18,7 +18,6 @@ from nltk.corpus import stopwords
 from nltk.probability import FreqDist
 import gensim
 
-
 GDPR_DATE = datetime(2016, 4, 20)
 CCPA_DATE = datetime(2018, 6, 28)
 
@@ -193,7 +192,7 @@ def privacy_questions(tagged_df: pd.DataFrame, columns_for_classification: list[
         privacy_df[column] = privacy_df[column].apply(remove_emoji)
         privacy_df[column + '_feature_set'] = privacy_df[column].apply(dialogue_act_features)
         privacy_df[column + '_dialogue_act_type'] = privacy_df[column + '_feature_set'].apply(classifier.classify)
-        privacy_df['Question_Flag'] = privacy_df['Question_Flag'] |\
+        privacy_df['Question_Flag'] = privacy_df['Question_Flag'] | \
                                       privacy_df[column + '_dialogue_act_type'].str.contains('Question', regex=True)
 
     return privacy_df[privacy_df['Question_Flag']].copy()
@@ -228,9 +227,13 @@ def submissions_sentiment_analysis(df_sentiment: pd.DataFrame, columns_to_analyz
     sid_obj = SIA()
     for column in columns_to_analyze:
         df_sentiment[column + '_sentiment_polarity_scores'] = df_sentiment[column].apply(sid_obj.polarity_scores)
-        df_sentiment[column + '_compound_score'] = df_sentiment[column + '_sentiment_polarity_scores'].apply(lambda x: x.get('compound'))
-        df_sentiment[column + '_sentiment'] = np.where(df_sentiment[column + '_compound_score'] >= neutrality_width, 'Positive',
-                                                       np.where(df_sentiment[column + '_compound_score'] <= -neutrality_width, 'Negative', 'Neutral'))
+        df_sentiment[column + '_compound_score'] = df_sentiment[column + '_sentiment_polarity_scores'].apply(
+            lambda x: x.get('compound'))
+        df_sentiment[column + '_sentiment'] = np.where(df_sentiment[column + '_compound_score'] >= neutrality_width,
+                                                       'Positive',
+                                                       np.where(df_sentiment[
+                                                                    column + '_compound_score'] <= -neutrality_width,
+                                                                'Negative', 'Neutral'))
     return df_sentiment
 
 
@@ -248,8 +251,10 @@ def token_lemmat_prep(df_to_prep: pd.DataFrame, target_columns: list[str]) -> pd
         lemmatized_column = 'lemmatized_' + column
         df_to_prep[lemmatized_column] = df_to_prep[column].str.lower()
         df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(tokenize.word_tokenize)
-        df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(lambda lst: [word for word in lst if word not in stop_words])
-        df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(lambda lst: [lemmatizer.lemmatize(word) for word in lst])
+        df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(
+            lambda lst: [word for word in lst if word not in stop_words])
+        df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(
+            lambda lst: [lemmatizer.lemmatize(word) for word in lst])
 
     return df_to_prep
 
@@ -262,18 +267,18 @@ def privacy_word_phrase_freq(tokenized_list: list) -> dict:
     """
     token_privacy_key_phrases = [tuple(tokenize.word_tokenize(phrase)) for phrase in get_privacy_keywords()]
     tuples_token_priv_key_phrases = [(x) for x in token_privacy_key_phrases]
-    
+
     word_phrase_freq = dict.fromkeys(tuples_token_priv_key_phrases, 0)
-    
+
     word_phrase_freq_prep = []
     for size in 1, 2, 3, 4:
         word_phrase_freq_prep.append(FreqDist(ngrams(tokenized_list, size)))
-    
+
     for freq in word_phrase_freq_prep:
         for key, value in freq.items():
             if key in word_phrase_freq.keys():
                 word_phrase_freq[key] += value
-        
+
     return word_phrase_freq
 
 
@@ -284,13 +289,13 @@ def remove_emoji(string: str) -> str:
     :return: New string without emoji.
     """
     emoji_pattern = re.compile("["
-                           u"\U0001F600-\U0001F64F"  # emoticons
-                           u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-                           u"\U0001F680-\U0001F6FF"  # transport & map symbols
-                           u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-                           u"\U00002702-\U000027B0"
-                           u"\U000024C2-\U0001F251"
-                           "]+", flags=re.UNICODE)
+                               u"\U0001F600-\U0001F64F"  # emoticons
+                               u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+                               u"\U0001F680-\U0001F6FF"  # transport & map symbols
+                               u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+                               u"\U00002702-\U000027B0"
+                               u"\U000024C2-\U0001F251"
+                               "]+", flags=re.UNICODE)
     return emoji_pattern.sub(r'', string)
 
 
@@ -306,7 +311,7 @@ def word_frequency_analysis(df_to_count: pd.DataFrame, subreddit: str) -> None:
     """
     token_privacy_key_phrases = [tuple(tokenize.word_tokenize(phrase)) for phrase in get_privacy_keywords()]
     tuples_token_priv_key_phrases = [(x) for x in token_privacy_key_phrases]
-    
+
     word_phrase_freq = dict.fromkeys(tuples_token_priv_key_phrases, 0)
 
     privacy_df = privacy_filter(df_to_count)
@@ -351,7 +356,7 @@ def dictionary_key_sum(list_of_dicts: list, target_dict: dict = None) -> dict:
                 target_dict[key] += value
             else:
                 target_dict[key] = value
-    
+
     return target_dict
 
 
@@ -374,25 +379,35 @@ def sentiment_graphing(df_to_analyze: pd.DataFrame, subreddit: str,
     privacy_df = privacy_filter(df_to_analyze)[target_columns].copy()
     privacy_df.set_index("created_utc", inplace=True)
 
-    monthly_sentiment = privacy_df.groupby(pd.Grouper(freq="M")).apply(lambda x: pd.Series(dict(Percent_Positive_Title=(x.title_sentiment == 'Positive').sum(),
-                                                                                                Percent_Neutral_Title=(x.title_sentiment == 'Neutral').sum(),
-                                                                                                Percent_Negative_Title=(x.title_sentiment == 'Negative').sum(),
-                                                                                                Percent_Positive_Body=(x.body_sentiment == 'Positive').sum(),
-                                                                                                Percent_Neutral_Body=(x.body_sentiment == 'Neutral').sum(),
-                                                                                                Percent_Negative_Body=(x.body_sentiment == 'Negative').sum())))
+    monthly_sentiment = privacy_df.groupby(pd.Grouper(freq="M")).apply(
+        lambda x: pd.Series(dict(Percent_Positive_Title=(x.title_sentiment == 'Positive').sum(),
+                                 Percent_Neutral_Title=(x.title_sentiment == 'Neutral').sum(),
+                                 Percent_Negative_Title=(x.title_sentiment == 'Negative').sum(),
+                                 Percent_Positive_Body=(x.body_sentiment == 'Positive').sum(),
+                                 Percent_Neutral_Body=(x.body_sentiment == 'Neutral').sum(),
+                                 Percent_Negative_Body=(x.body_sentiment == 'Negative').sum())))
 
-    monthly_sentiment["title_total"] = monthly_sentiment[["Percent_Positive_Title", "Percent_Neutral_Title", "Percent_Negative_Title"]].sum(axis=1)
-    monthly_sentiment["body_total"] = monthly_sentiment[["Percent_Positive_Body", "Percent_Neutral_Body", "Percent_Negative_Body"]].sum(axis=1)
+    monthly_sentiment["title_total"] = monthly_sentiment[
+        ["Percent_Positive_Title", "Percent_Neutral_Title", "Percent_Negative_Title"]].sum(axis=1)
+    monthly_sentiment["body_total"] = monthly_sentiment[
+        ["Percent_Positive_Body", "Percent_Neutral_Body", "Percent_Negative_Body"]].sum(axis=1)
 
-    monthly_sentiment["Percent_Positive_Title"] = monthly_sentiment["Percent_Positive_Title"]/monthly_sentiment["title_total"]
-    monthly_sentiment["Percent_Neutral_Title"] = monthly_sentiment["Percent_Neutral_Title"]/monthly_sentiment["title_total"]
-    monthly_sentiment["Percent_Negative_Title"] = monthly_sentiment["Percent_Negative_Title"]/monthly_sentiment["title_total"]
-    monthly_sentiment["Percent_Positive_Body"] = monthly_sentiment["Percent_Positive_Body"]/monthly_sentiment["body_total"]
-    monthly_sentiment["Percent_Neutral_Body"] = monthly_sentiment["Percent_Neutral_Body"]/monthly_sentiment["body_total"]
-    monthly_sentiment["Percent_Negative_Body"] = monthly_sentiment["Percent_Negative_Body"]/monthly_sentiment["body_total"]
+    monthly_sentiment["Percent_Positive_Title"] = monthly_sentiment["Percent_Positive_Title"] / monthly_sentiment[
+        "title_total"]
+    monthly_sentiment["Percent_Neutral_Title"] = monthly_sentiment["Percent_Neutral_Title"] / monthly_sentiment[
+        "title_total"]
+    monthly_sentiment["Percent_Negative_Title"] = monthly_sentiment["Percent_Negative_Title"] / monthly_sentiment[
+        "title_total"]
+    monthly_sentiment["Percent_Positive_Body"] = monthly_sentiment["Percent_Positive_Body"] / monthly_sentiment[
+        "body_total"]
+    monthly_sentiment["Percent_Neutral_Body"] = monthly_sentiment["Percent_Neutral_Body"] / monthly_sentiment[
+        "body_total"]
+    monthly_sentiment["Percent_Negative_Body"] = monthly_sentiment["Percent_Negative_Body"] / monthly_sentiment[
+        "body_total"]
     monthly_sentiment.drop(columns=["title_total", "body_total"], inplace=True)
-    
-    title_max = max(monthly_sentiment[["Percent_Positive_Title", "Percent_Neutral_Title", "Percent_Negative_Title"]].max())
+
+    title_max = max(
+        monthly_sentiment[["Percent_Positive_Title", "Percent_Neutral_Title", "Percent_Negative_Title"]].max())
     body_max = max(monthly_sentiment[["Percent_Positive_Body", "Percent_Neutral_Body", "Percent_Negative_Body"]].max())
 
     fig, (ax1, ax2) = plt.subplots(2, 1)
@@ -400,9 +415,9 @@ def sentiment_graphing(df_to_analyze: pd.DataFrame, subreddit: str,
     monthly_sentiment[["Percent_Positive_Title", "Percent_Neutral_Title", "Percent_Negative_Title"]].plot(ax=ax1)
     ax1.axvline(GDPR_DATE, color="black", label="GDPR")
     ax1.axvline(CCPA_DATE, color="black", label="CCPA")
-    ax1.text(GDPR_DATE, title_max*.9, "GDPR")
-    ax1.text(CCPA_DATE, title_max*.9, "CCPA")
-    ax1.legend(fontsize = 'small',
+    ax1.text(GDPR_DATE, title_max * .9, "GDPR")
+    ax1.text(CCPA_DATE, title_max * .9, "CCPA")
+    ax1.legend(fontsize='small',
                labels=["Percent_Positive_Title", "Percent_Neutral_Title", "Percent_Negative_Title"],
                bbox_to_anchor=(1.4, 1),
                loc=1,
@@ -410,14 +425,14 @@ def sentiment_graphing(df_to_analyze: pd.DataFrame, subreddit: str,
     monthly_sentiment[["Percent_Positive_Body", "Percent_Neutral_Body", "Percent_Negative_Body"]].plot(ax=ax2)
     ax2.axvline(GDPR_DATE, color="black", label="GDPR")
     ax2.axvline(CCPA_DATE, color="black", label="CCPA")
-    ax2.text(GDPR_DATE, body_max*.9, "GDPR")
-    ax2.text(CCPA_DATE, body_max*.9, "CCPA")
-    ax2.legend(fontsize = 'small',
+    ax2.text(GDPR_DATE, body_max * .9, "GDPR")
+    ax2.text(CCPA_DATE, body_max * .9, "CCPA")
+    ax2.legend(fontsize='small',
                labels=["Percent_Positive_Body", "Percent_Neutral_Body", "Percent_Negative_Body"],
                bbox_to_anchor=(1.4, 1),
                loc=1,
                ncol=1)
-    
+
     return monthly_sentiment
 
 
@@ -473,7 +488,7 @@ def run_subreddit(df: pd.DataFrame, subreddit: str) -> None:
     # Question Topic Analysis
     topic_df = privacy_questions(df, ['title'])
     topic_filters = ['gdpr', 'ccpa', 'private', 'privacy']
-    topic_df['topic_mask'] = topic_df['lemmatized_title'].apply(lambda x: any(topic in x for topic in topic_filters)) |\
+    topic_df['topic_mask'] = topic_df['lemmatized_title'].apply(lambda x: any(topic in x for topic in topic_filters)) | \
                              topic_df['lemmatized_body'].apply(lambda x: any(topic in x for topic in topic_filters))
     # Setup data for an overall topic set and pre/post ccpa/gdpr sets
     topic_df = topic_df[topic_df['topic_mask']].copy()

@@ -30,7 +30,8 @@ This project is built from the following python libraries:
 * [PMAW: Pushshift Multithread API Wrapper](https://github.com/mattpodolak/pmaw "PMAW: Pushshift Multithread API Wrapper")
 * [Pandas](https://pandas.pydata.org/ "Pandas")
 * [matplotlib](https://matplotlib.org/ "matplotlib")
-* [wordcloud](https://amueller.github.io/word_cloud/ "wordcloud")
+* [Natural Language Toolkit (nltk)](https://www.nltk.org/ "nltk")
+* [Gensim](https://radimrehurek.com/gensim/ "gensim")
 ## Reddit Account and Application Registration
 For fetching up to date Reddit posts, this project requires a read only connection with Reddit. This connection is not required if only static datasets from github are used. 
 
@@ -42,13 +43,21 @@ To use PRAW OAuth, connection details based on the registered account/applicatio
 
 # How to Use
 
-## Directly Running with Static Datasets - WIP
-The simpliest method to directly reproduce the outputs of this project using the static datasets in github is to run the following:   
+## Directly Running with Static Datasets
+After setting up the project, the simpliest method to directly reproduce the outputs of this project using the static datasets in github is to run the following:   
 ```python
 import reddit_privacy_analysis 
 reddit_privacy_analysis.run_project(fetch_data=False)
 ```
 This will generate several matplotlib objects and produce csv outputs in the current python working directory.
+Running this for all subreddits in the config file can take 10-30mins depending on your processor even when using existing datasets.
+
+## NLTK Corpus files
+Downloading NLTK corpus files is needed to run this project. This can most easily be accomplished by running the following code to start the NLTK download manager.
+```python
+import nltk 
+nltk.download()
+```
 
 ## Setup Configuration File
 Setting up a After cloning or otherwise getting this project down to use, the praw.ini file needs to be updated with login information.
@@ -72,23 +81,62 @@ Other methods for providing the connection information can be used; see [PRAW OA
 
 
 ## Loading Data
-### Load Existing Dataset - TBD
+### Load Existing Dataset
 This project includes pre-pulled static datasets, these can be loaded into Pandas dataframes.
 ```python
-data = reddit_privacy_analysis.load_dataset('androiddev')
+import pandas as pd
+
+data = pd.read_csv('Data/webdev_submissions_raw_data.zip')
 ```
 
-### Query Reddit for New Data - TBD
+### Query Reddit for New Data
 Up to date Reddit can be fetched. Getting current data requires a connection with Reddit, see [How to setup configuration file](https://github.com/mschrider/PEP_Privacy_Dev_Forum_Analysis/edit/main/README.md#setup-configuration-file) for instructions on how to enable an authorized connection with Reddit. Newly fetched data will need to be cleansed see [Cleansing Fetched Data](https://github.com/mschrider/PEP_Privacy_Dev_Forum_Analysis/edit/main/README.md#cleansing-fetched-data---tbd)
 ```python
-data = reddit_privacy_analysis.fetch_dataset('androiddev')
+import reddit_data
+import praw
+from pmaw import PushshiftAPI
+from datetime import datetime
+
+reddit = praw.Reddit()
+api = PushshiftAPI(praw=reddit)
+print('Connected as: %s' % reddit.user.me())
+before = int(datetime.strptime("11/01/2022", '%m/%d/%Y').timestamp())
+after = int(datetime.strptime("07/12/2009", '%m/%d/%Y').timestamp())
+data = reddit_data.submissions(api, subreddit, before=before, after=after)
 ```
+Fetching new data can take hours to days depending on the status of the pushshift servers. Please be patient with the process and be prepared to run it several times as interruptions/fails are not uncommon.
 
-### Cleansing Fetched Data - TBD
+### Cleansing Fetched Data
+Reddit data needs to be cleansed and prepped prior to use. The clean_submission function removes emojis, converts the reddit UTC timestamp to a more user friendly format, removed deleted/removed posts, and renames the 'selftext' field to the more intuitive 'body' field.
+'''python
+cleaned_data = clean_submission(data)
+'''
 
-## Producing Analysis Outputs - TBD
+### Prepping Data - Tokenization and Lemmatization
+Prior to processing with NLTK reddit data must be tokenized (turned into a bag of words) and words must be lemmatized (reduced to their 'root' form).
+The token_lemmat_prep function accomplishes both these tasks by leveraging NLTK's WordNetLemmatizer and the default NLTK tokenizer.
+'''python
+token_lemmat_data = token_lemmat_prep(cleaned_data, ['title', 'body'])
+'''
+
+### Prepping Data - Data Tagging
+
+
+## Producing Analysis Outputs
 Details on the implementation of the analysis are located in [Data Analysis](https://github.com/mschrider/PEP_Privacy_Dev_Forum_Analysis/edit/main/README.md#data-analysis---tbd).
 
+### Question Topic Analysis
+'''python
+topic_df = privacy_questions(tagged_, ['title'])
+privacy_topics = topic_analysis(topic_df, ['lemmatized_title', 'lemmatized_body'])
+'''
+
+### Run All Analysis
+Running all analysis at once to produce three matplotlib objects and a output csv (for topics)
+'''python
+data = pd.read_csv('Data/webdev_submissions_raw_data.zip')
+run_subreddit(data, 'webdev')
+'''
 
 # Data Analysis - TBD
 

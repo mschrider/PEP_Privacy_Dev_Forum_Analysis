@@ -220,8 +220,8 @@ def submissions_sentiment_analysis(df_sentiment: pd.DataFrame, columns_to_analyz
     """Adds sentiment score to DataFrame to provided columns. This creates new columns in the DataFrame.
 
     :param df_sentiment: Cleaned Dataframe
-    :param columns_to_analyze:
-    :param neutrality_width:
+    :param columns_to_analyze: columns that will drive the sentiment score
+    :param neutrality_width: what distance from 0.0 a scored item is considered neutral
     :return: DataFrame with three new columns per analyzed column. Column + '_sentiment' contains the sentiment score.
     """
     sid_obj = SIA()

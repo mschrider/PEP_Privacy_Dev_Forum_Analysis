@@ -10,7 +10,9 @@ import numpy as np
 import praw
 from pmaw import PushshiftAPI
 import matplotlib.pyplot as plt
-from matplotlib import pylab
+import matplotlib.colors as mcolors
+import seaborn as sns
+from wordcloud import WordCloud, STOPWORDS
 from nltk.sentiment.vader import SentimentIntensityAnalyzer as SIA
 from nltk.stem import WordNetLemmatizer
 from nltk import tokenize, corpus, word_tokenize, NaiveBayesClassifier, ngrams
@@ -306,9 +308,10 @@ def word_frequency_analysis(df_to_count: pd.DataFrame, subreddit: str) -> None:
     Uses nltk FreqDist() class for plotting which uses matplotlib pylab.
 
     :param df_to_count: Lemmatized DataFrame
-    :param subreddit: subreddit applicable to the DataFrame (used as part of graph titles)
+    :param subreddit: subreddit (used for titles in graph)
     :return: None
     """
+    
     token_privacy_key_phrases = [tuple(tokenize.word_tokenize(phrase)) for phrase in get_privacy_keywords()]
     tuples_token_priv_key_phrases = [(x) for x in token_privacy_key_phrases]
 
@@ -332,9 +335,15 @@ def word_frequency_analysis(df_to_count: pd.DataFrame, subreddit: str) -> None:
         frequency_distributions[root_column_name] = freq_dist.copy()
 
     for column_name, frequency_distribution in frequency_distributions.items():
-        # NLTK uses pylab in the FreqDist.plot() method; A new figure is needed to prevent overwriting the same image
-        pylab.figure()
-        frequency_distribution.plot(10, cumulative=False, title='%s %s Word Freq' % (subreddit, column_name.title()))
+    
+        frequency_distribution = pd.Series(dict(frequency_distribution))
+        frequency_distribution.sort_values(inplace=True, ascending=False)
+        frequency_distribution = frequency_distribution[0:9]
+        fig, ax = plt.subplots()
+        fig.suptitle('%s %s Word Freq' % (subreddit, column_name.title()))
+        
+        sns.barplot(y=frequency_distribution.index, x=frequency_distribution.values)
+        ax.set(xlabel='# Occurences', ylabel='Privay Terms')
 
     return
 
@@ -436,6 +445,47 @@ def sentiment_graphing(df_to_analyze: pd.DataFrame, subreddit: str,
     return monthly_sentiment
 
 
+def sentiment_graphing_simple(df_to_analyze):
+    
+    gdpr_date = datetime(2016, 4, 20)
+    ccpa_date = datetime(2018, 6, 28)
+    subreddit = df_to_analyze['subreddit'].iloc[0]
+    
+    privacy_df = df_to_analyze.loc[(df_to_analyze["title_privacy_flag"] == 1) | (df_to_analyze["body_privacy_flag"] == 1)].copy()
+    # Removing anything before 2014 as there appears to be data integrity issues with source data
+    privacy_df = privacy_df.loc[privacy_df.created_utc > datetime(2014,1,1)]
+    privacy_df = privacy_df[["created_utc", "title_compound_score", "body_compound_score"]].copy()
+    privacy_df.set_index("created_utc", inplace=True)
+    
+    privacy_df_monthly_sentiment = privacy_df.groupby(pd.Grouper(freq="M")).agg(Title_Polarity=("title_compound_score", 'mean'),
+                                                                                Body_Polarity=("body_compound_score", 'mean'),
+                                                                                Total_Posts=("body_compound_score", 'count'))
+
+    
+    sns.set_style('white')
+    
+    fig, ax1 = plt.subplots()
+    fig.suptitle("%s Sentiment Percentage Over Time" % subreddit)
+    ax2 = ax1.twinx()
+    
+    sns.lineplot(data=privacy_df_monthly_sentiment["Total_Posts"], ax = ax2, color='lightgrey', label='Total Posts')
+    sns.lineplot(data=privacy_df_monthly_sentiment[["Title_Polarity", "Body_Polarity"]], ax = ax1)
+    
+    ax1.legend(loc='lower left', fontsize='small')
+    ax2.legend(loc='lower right', fontsize='small')
+    
+    ax1.axvline(gdpr_date, color="black", label="GDPR")
+    ax1.axvline(ccpa_date, color="black", label="CCPA")
+    ax1.text(gdpr_date, 0.9, "GDPR")
+    ax1.text(ccpa_date, 0.9, "CCPA")
+    
+    ax1.set_ylabel('Polarity (-1 to 1)')
+    ax1.set_ylim([-1,1])
+    ax2.set_ylabel("Number of Posts (Monthly)")
+    ax1.set_xlabel('Date Post Created')
+    ax1.set_xlim([datetime(2014,1,1), datetime(2022,11,1)])
+
+
 def topic_analysis(tokenized_lemma_df: pd.DataFrame, target_lemma_token_columns: list[str], num_words: int = 4,
                    num_topics: int = 10, passes: int = 10) -> dict:
     """Conduct Latent Dirichlet allocation analysis againt provided tokenized and lemmatized data.
@@ -450,8 +500,14 @@ def topic_analysis(tokenized_lemma_df: pd.DataFrame, target_lemma_token_columns:
     :param passes: number of training passes on the corpus
     :return: dictionary with target columns as the keys and associated top topics as values
     """
+    
+    subreddit = tokenized_lemma_df['subreddit'].iloc[0]
+    
     results = {}
     for target_column in target_lemma_token_columns:
+        
+        content_title = target_column[target_column.index('_')+1:].capitalize()
+        
         lda_prep = 'LDA_Prep_' + target_column
         tokenized_lemma_df[lda_prep] = tokenized_lemma_df[target_column].apply(lambda x: [w for w in x if w.isalnum()])
         text = tokenized_lemma_df[lda_prep].to_list()
@@ -460,7 +516,35 @@ def topic_analysis(tokenized_lemma_df: pd.DataFrame, target_lemma_token_columns:
         lda_model = gensim.models.ldamodel.LdaModel(corpora, num_topics=num_topics, id2word=dictionary, passes=passes)
         topics = lda_model.print_topics(num_words=num_words)
         results[target_column] = [topic for topic in topics]
-
+        
+        # Create Word Cloud Visuals for the LDA Model
+        cols = [color for name, color in mcolors.TABLEAU_COLORS.items()]
+        
+        cloud = WordCloud(stopwords=STOPWORDS,
+                          background_color='white',
+                          max_words=10,
+                          colormap='tab10',
+                          color_func=lambda *args, **kwargs: cols[i],
+                          prefer_horizontal=1.0)
+        
+        topics = lda_model.show_topics(formatted=False)
+        
+        fig, axes = plt.subplots(2, 2, figsize=(10, 10), sharex=True, sharey=True)
+        
+        for i, ax in enumerate(axes.flatten()):
+            fig.add_subplot(ax)
+            fig.suptitle('%s %s Top Topics' % (subreddit,content_title), fontsize='xx-large')
+            topic_words = dict(topics[i][1])
+            cloud.generate_from_frequencies(topic_words, max_font_size=300)
+            plt.gca().imshow(cloud)
+            plt.gca().set_title('Topic ' + str(i), fontdict=dict(size=16))
+            plt.gca().axis('off')
+            
+        plt.subplots_adjust(wspace=0, hspace=0)
+        plt.axis('off')
+        plt.margins(x=0, y=0)
+        plt.tight_layout()
+        plt.show()
     return results
 
 
@@ -511,7 +595,8 @@ def run_subreddit(df: pd.DataFrame, subreddit: str) -> None:
     word_frequency_analysis(df, subreddit)
 
     # Generate graphs for sentiment
-    sentiment_graphing(df, subreddit, ["created_utc", "title_sentiment", "body_sentiment"])
+    # sentiment_graphing(df, subreddit, ["created_utc", "title_sentiment", "body_sentiment"])
+    sentiment_graphing_simple(df)
 
 
 def run_project(fetch_data: bool = False) -> None:

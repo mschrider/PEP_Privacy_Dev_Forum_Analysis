@@ -1,4 +1,4 @@
-import reddit_data
+from reddit_data import SubredditData
 
 import json
 import re
@@ -464,12 +464,22 @@ def topic_analysis(tokenized_lemma_df: pd.DataFrame, target_lemma_token_columns:
     return results
 
 
-def run_subreddit(df: pd.DataFrame, subreddit: str) -> None:
+def run_subreddit(data: Union[pd.DataFrame, SubredditData], subreddit: str) -> None:
     """Runs all analysis against a subreddit using raw subreddit data. Cleans/Tokenizes/Lemmatizes data as necessary.
 
-    :param df: raw reddit data from PMAW
-    :param subreddit: subreddit the data is assoicated with
+    :param data: Pandas DataFrame or reddit_data.SubredditData that contains submissions from PMAW
+    :param subreddit: subreddit the data is associated with
     """
+
+    # TODO Update the subreddit parameter so that it is optional and inferred from df or from SubredditData
+
+    if type(data) == pd.DataFrame:
+        df = data
+    elif type(data) == SubredditData:
+        df = data.data
+    else:
+        raise ValueError('Provided subreddit data must be of type pd.DataFrame or SubredditData')
+
     start = time.perf_counter()
 
     # Limit dataframe to just the necessary columns
@@ -523,6 +533,7 @@ def run_project(fetch_data: bool = False) -> None:
 
     for subreddit_config in subreddits_config:
         subreddit = subreddit_config['subreddit']
+        subreddit_data = SubredditData(subreddit=subreddit, reddit_data_type='submissions')
         if fetch_data or subreddit_config['fetch_data']:
             # This line looks for a praw.ini config file in your working directory
             # See the config section of the readme for details
@@ -531,9 +542,9 @@ def run_project(fetch_data: bool = False) -> None:
             print('Connected as: %s' % reddit.user.me())
             before = int(datetime.strptime(subreddit_config['before'], '%m/%d/%Y').timestamp())
             after = int(datetime.strptime(subreddit_config['after'], '%m/%d/%Y').timestamp())
-            subreddit_data = reddit_data.submissions(api, subreddit, before=before, after=after)
+            subreddit_data.fetch_new_data(api_instance=api, before=before, after=after)
         else:
-            subreddit_data = pd.read_csv(subreddit_config['submissions_data_path'])
+            subreddit_data = subreddit_data.load_data(subreddit_config['submissions_data_path'])
 
         run_subreddit(subreddit_data, subreddit)
 

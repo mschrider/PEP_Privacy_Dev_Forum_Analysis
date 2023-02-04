@@ -10,13 +10,9 @@ def submissions(api_instance: PushshiftAPI, target_subreddit: str,
                 before: int = None, after: int = None, submission_pull_limit: int = None,
                 write_data: bool = True, output_directory: str = None):
 
-    # TODO Make a more formal method for timing and outputting progress
     start = time.perf_counter()
-
-    # TODO Confirm behavior if before/after is None. There might be side-effects
     data = pd.DataFrame(api_instance.search_submissions(subreddit=target_subreddit, limit=submission_pull_limit,
                                                         before=before, after=after))
-    # TODO Make a more formal method for timing and outputting progress
     print('Time to pull submissions: %f' % (time.perf_counter() - start))
     
     if write_data:
@@ -28,16 +24,11 @@ def submissions(api_instance: PushshiftAPI, target_subreddit: str,
     return data
 
 
-def comments(api_instance: PushshiftAPI, target_subreddit: str,
-             before: int = None, after: int = None, submission_pull_limit: int = None,
+def comments(api_instance: PushshiftAPI, target_subreddit: str, before: int, after: int,
              write_data: bool = True, output_directory: str = None):
-    # TODO Make a more formal method for timing and outputting progress
     start = time.perf_counter()
-
-    # TODO Confirm behavior if before/after is None. There might be side-effects
-    data = pd.DataFrame(api_instance.search_comments(subreddit=target_subreddit, limit=submission_pull_limit,
-                                                     before=before, after=after))
-    # TODO Make a more formal method for timing and outputting progress
+    print('started')
+    data = pd.DataFrame(api_instance.search_comments(subreddit=target_subreddit, before=before, after=after))
     print('Time to pull comments: %f' % (time.perf_counter() - start))
 
     if write_data:

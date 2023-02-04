@@ -1,0 +1,11 @@
+,lemmatized_title,lemmatized_body
+0,"(0, '0.048*""project"" + 0.036*""site"" + 0.024*""footer"" + 0.013*""hosting""')","(0, '0.019*""build"" + 0.014*""website"" + 0.011*""want"" + 0.011*""budget""')"
+1,"(1, '0.027*""web"" + 0.027*""best"" + 0.027*""private"" + 0.014*""key""')","(1, '0.018*""private"" + 0.016*""project"" + 0.010*""company"" + 0.009*""site""')"
+2,"(2, '0.052*""private"" + 0.027*""method"" + 0.027*""best"" + 0.027*""app""')","(2, '0.014*""root"" + 0.011*""work"" + 0.011*""php"" + 0.009*""private""')"
+3,"(3, '0.024*""page"" + 0.024*""budget"" + 0.024*""meaningful"" + 0.024*""update""')","(3, '0.013*""want"" + 0.012*""site"" + 0.012*""user"" + 0.011*""service""')"
+4,"(4, '0.033*""private"" + 0.025*""management"" + 0.017*""database"" + 0.017*""vps""')","(4, '0.015*""would"" + 0.012*""one"" + 0.012*""site"" + 0.011*""private""')"
+5,"(5, '0.031*""api"" + 0.031*""use"" + 0.021*""user"" + 0.021*""facebook""')","(5, '0.012*""user"" + 0.010*""would"" + 0.010*""want"" + 0.010*""database""')"
+6,"(6, '0.024*""domain"" + 0.024*""use"" + 0.024*""private"" + 0.013*""webdev""')","(6, '0.014*""user"" + 0.012*""private"" + 0.011*""server"" + 0.010*""photo""')"
+7,"(7, '0.036*""need"" + 0.036*""privacy"" + 0.028*""website"" + 0.027*""anyone""')","(7, '0.013*""email"" + 0.010*""need"" + 0.010*""idms"" + 0.009*""user""')"
+8,"(8, '0.037*""private"" + 0.025*""privacy"" + 0.025*""developer"" + 0.025*""community""')","(8, '0.014*""like"" + 0.011*""project"" + 0.011*""private"" + 0.010*""website""')"
+9,"(9, '0.046*""private"" + 0.024*""solution"" + 0.023*""website"" + 0.023*""make""')","(9, '0.020*""site"" + 0.019*""would"" + 0.015*""like"" + 0.014*""want""')"

@@ -1,0 +1,11 @@
+,lemmatized_title,lemmatized_body
+0,"(0, '0.030*""web"" + 0.021*""website"" + 0.016*""gdpr"" + 0.015*""private""')","(0, '0.017*""http"" + 0.012*""domain"" + 0.011*""account"" + 0.010*""user""')"
+1,"(1, '0.032*""domain"" + 0.021*""whois"" + 0.019*""private"" + 0.018*""privacy""')","(1, '0.015*""know"" + 0.011*""like"" + 0.009*""website"" + 0.006*""would""')"
+2,"(2, '0.039*""gdpr"" + 0.022*""private"" + 0.018*""analytics"" + 0.015*""compliant""')","(2, '0.014*""like"" + 0.012*""would"" + 0.011*""website"" + 0.010*""private""')"
+3,"(3, '0.042*""private"" + 0.021*""gdpr"" + 0.020*""would"" + 0.018*""need""')","(3, '0.017*""user"" + 0.008*""using"" + 0.007*""page"" + 0.007*""private""')"
+4,"(4, '0.038*""private"" + 0.027*""privacy"" + 0.012*""website"" + 0.012*""gdpr""')","(4, '0.010*""site"" + 0.010*""need"" + 0.009*""private"" + 0.008*""website""')"
+5,"(5, '0.042*""best"" + 0.026*""way"" + 0.018*""use"" + 0.015*""api""')","(5, '0.011*""private"" + 0.010*""remote"" + 0.009*""http"" + 0.008*""would""')"
+6,"(6, '0.029*""gdpr"" + 0.029*""website"" + 0.012*""user"" + 0.012*""private""')","(6, '0.015*""would"" + 0.014*""like"" + 0.012*""privacy"" + 0.010*""website""')"
+7,"(7, '0.021*""privacy"" + 0.017*""private"" + 0.016*""website"" + 0.016*""developer""')","(7, '0.012*""removed"" + 0.011*""data"" + 0.011*""string"" + 0.010*""client""')"
+8,"(8, '0.027*""private"" + 0.021*""user"" + 0.018*""content"" + 0.015*""data""')","(8, '0.011*""use"" + 0.009*""server"" + 0.009*""like"" + 0.009*""would""')"
+9,"(9, '0.044*""website"" + 0.036*""private"" + 0.022*""create"" + 0.012*""gdpr""')","(9, '0.018*""user"" + 0.015*""token"" + 0.009*""use"" + 0.008*""session""')"

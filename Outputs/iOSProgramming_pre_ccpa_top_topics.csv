@@ -1,0 +1,11 @@
+,lemmatized_title,lemmatized_body
+0,"(0, '0.040*""app"" + 0.040*""private"" + 0.030*""controller"" + 0.030*""view""')","(0, '0.041*""uiimage"" + 0.034*""var"" + 0.032*""named"" + 0.022*""string""')"
+1,"(1, '0.085*""app"" + 0.018*""use"" + 0.018*""anyone"" + 0.018*""question""')","(1, '0.021*""class"" + 0.017*""using"" + 0.017*""swift"" + 0.017*""storage""')"
+2,"(2, '0.028*""ibeacons"" + 0.028*""uuids"" + 0.028*""without"" + 0.028*""beacon""')","(2, '0.041*""let"" + 0.029*""collectionview"" + 0.021*""cell"" + 0.019*""indexpath""')"
+3,"(3, '0.032*""io"" + 0.022*""java"" + 0.022*""within"" + 0.022*""private""')","(3, '0.028*""method"" + 0.020*""private"" + 0.015*""app"" + 0.015*""get""')"
+4,"(4, '0.035*""swift"" + 0.035*""private"" + 0.024*""class"" + 0.024*""core""')","(4, '0.026*""app"" + 0.014*""possible"" + 0.013*""private"" + 0.012*""data""')"
+5,"(5, '0.051*""private"" + 0.035*""viewcontrollers"" + 0.018*""developer"" + 0.018*""code""')","(5, '0.011*""apps"" + 0.010*""app"" + 0.009*""something"" + 0.009*""user""')"
+6,"(6, '0.025*""using"" + 0.025*""get"" + 0.025*""number"" + 0.025*""update""')","(6, '0.026*""app"" + 0.018*""context"" + 0.017*""queue"" + 0.015*""private""')"
+7,"(7, '0.018*""store"" + 0.018*""io"" + 0.018*""multiple"" + 0.018*""possible""')","(7, '0.021*""question"" + 0.013*""post"" + 0.013*""privacy"" + 0.009*""stack""')"
+8,"(8, '0.041*""privacy"" + 0.028*""link"" + 0.028*""user"" + 0.028*""need""')","(8, '0.016*""view"" + 0.016*""controller"" + 0.012*""ibaction"" + 0.011*""library""')"
+9,"(9, '0.026*""cloudkit"" + 0.026*""policy"" + 0.026*""user"" + 0.026*""current""')","(9, '0.027*""data"" + 0.015*""app"" + 0.011*""view"" + 0.010*""access""')"

@@ -2,28 +2,21 @@
   {"subreddit": "androiddev",
     "before": "11/01/2022",
     "after": "07/12/2009",
-    "use_existing_data": true,
+    "fetch_data": false,
     "submissions_data_path": "Data/androiddev_submissions_raw_data.zip",
     "comments_data_path": "Data/androiddev_comments_raw_data.zip"},
 
   {"subreddit": "webdev",
     "before": "11/01/2022",
     "after": "01/25/2009",
-    "use_existing_data": true,
+    "fetch_data": false,
     "submissions_data_path": "Data/webdev_submissions_raw_data.zip",
     "comments_data_path": "Data/webdev_comments_raw_data.zip"},
-
-  {"subreddit": "iosdev",
-    "before": "11/01/2022",
-    "after": "10/13/2010",
-    "use_existing_data": true,
-    "submissions_data_path": "Data/iosdev_submissions_raw_data.zip",
-    "comments_data_path": "Data/iosdev_comments_raw_data.zip"},
 
   {"subreddit": "iOSProgramming",
     "before": "11/01/2022",
     "after": "11/01/2010",
-    "use_existing_data": true,
+    "fetch_data": false,
     "submissions_data_path": "Data/iOSProgramming_submissions_raw_data.zip",
     "comments_data_path": "Data/iOSProgramming_comments_raw_data.zip"}
 ]}

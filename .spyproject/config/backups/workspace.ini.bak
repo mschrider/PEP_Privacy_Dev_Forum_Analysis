@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['C:\\Users\\Mike\\.spyder-py3\\temp.py', 'reddit_privacy_analysis.py']
+recent_files = ['C:\\Users\\Mike\\.spyder-py3\\temp.py', 'Config\\analysis_settings.json', 'reddit_privacy_analysis.py']
 
 [main]
 version = 0.2.0

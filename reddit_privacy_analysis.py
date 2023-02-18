@@ -1,5 +1,6 @@
 from reddit_data import SubredditData
 
+import pickle
 import json
 import re
 from typing import Union
@@ -19,6 +20,9 @@ from nltk import tokenize, corpus, word_tokenize, NaiveBayesClassifier, ngrams
 from nltk.corpus import stopwords
 from nltk.probability import FreqDist
 import gensim
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.feature_extraction import text
 
 GDPR_DATE = datetime(2016, 4, 20)
 CCPA_DATE = datetime(2018, 6, 28)
@@ -162,7 +166,7 @@ def privacy_filter(tagged_df: pd.DataFrame) -> pd.DataFrame:
     return tagged_df[tagged_df['privacy_flagged']].copy()
 
 
-def privacy_questions(tagged_df: pd.DataFrame, columns_for_classification: list[str]) -> pd.DataFrame:
+def privacy_questions(tagged_df: pd.DataFrame, columns_for_classification: list[str], retrain=False) -> pd.DataFrame:
     """Filters a privacy tagged DataFrame to questions as determined by a Naive Bayes Classifier.
 
     First this function runs privacy_filter(tagged_df) to filter down to privacy tagged submissions.
@@ -173,29 +177,24 @@ def privacy_questions(tagged_df: pd.DataFrame, columns_for_classification: list[
     :return: DataFrame filtered to privacy tagged questions
     """
     privacy_df = privacy_filter(tagged_df)
-    # Training is conducted on nltk nps chat corpus.
-    # Ideally a privacy or reddit developer specific training set would be used
-    posts = corpus.nps_chat.xml_posts()[:10000]
 
-    def dialogue_act_features(post):
-        features = {}
-        for word in word_tokenize(post):
-            features['contains({})'.format(word.lower())] = True
-        return features
+    if retrain:
+        question_training_set_raw = pd.read_csv(r'Data/questions_vs_statements_v1.0.zip')
+        vectorizer = text.CountVectorizer()
+        X = vectorizer.fit_transform(question_training_set_raw['doc'].tolist())
+        y = question_training_set_raw['target'].tolist()
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+        ada_clf = AdaBoostClassifier(n_estimators=25)
+        ada_clf.fit(X_train, y_train)
+        print('AdaBoost training score is: %s' % str(ada_clf.score(X_test, y_test)))
+    else:
+        vectorizer = pickle.load(open(r'Config/count_vectorizer.sav', 'rb'))
+        ada_clf = pickle.load(open(r'Config/question_classifier.sav', 'rb'))
 
-    feature_sets = [(dialogue_act_features(post.text), post.get('class')) for post in posts]
-    size = int(len(feature_sets) * 0.1)
-    train_set, test_set = feature_sets[size:], feature_sets[:size]
-    classifier = NaiveBayesClassifier.train(train_set)
-
-    privacy_df['Question_Flag'] = False
-    for column in columns_for_classification:
-        privacy_df[column] = privacy_df[column].astype(str)
-        privacy_df[column] = privacy_df[column].apply(remove_emoji)
-        privacy_df[column + '_feature_set'] = privacy_df[column].apply(dialogue_act_features)
-        privacy_df[column + '_dialogue_act_type'] = privacy_df[column + '_feature_set'].apply(classifier.classify)
-        privacy_df['Question_Flag'] = privacy_df['Question_Flag'] | \
-                                      privacy_df[column + '_dialogue_act_type'].str.contains('Question', regex=True)
+    privacy_df['title_selftext'] = privacy_df['title'].fillna('') + ' ' + privacy_df['selftext'].fillna('')
+    privacy_X = vectorizer.transform(privacy_df['title_selftext'].tolist())
+    privacy_df['Predict'] = ada_clf.predict(privacy_X)
+    privacy_df['Question_Flag'] = privacy_df['Predict'] == 1
 
     return privacy_df[privacy_df['Question_Flag']].copy()
 
@@ -239,11 +238,12 @@ def submissions_sentiment_analysis(df_sentiment: pd.DataFrame, columns_to_analyz
     return df_sentiment
 
 
-def token_lemmat_prep(df_to_prep: pd.DataFrame, target_columns: list[str]) -> pd.DataFrame:
+def token_lemmat_prep(df_to_prep: pd.DataFrame, target_columns: list[str], set_output: bool = False) -> pd.DataFrame:
     """Lemmatizes (converting words to root forms) and tokenizes (breaks up phrases/sentences) target columns.
 
     :param df_to_prep: DataFrame with text columns
     :param target_columns: Columns to prepare
+    :param set_output: determines if a set or list (bag) of tokens is made, default is a list
     :return: DataFrame with new lemmatized columns
     """
     lemmatizer = WordNetLemmatizer()
@@ -253,10 +253,16 @@ def token_lemmat_prep(df_to_prep: pd.DataFrame, target_columns: list[str]) -> pd
         lemmatized_column = 'lemmatized_' + column
         df_to_prep[lemmatized_column] = df_to_prep[column].str.lower()
         df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(tokenize.word_tokenize)
-        df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(
-            lambda lst: [word for word in lst if word not in stop_words])
-        df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(
-            lambda lst: [lemmatizer.lemmatize(word) for word in lst])
+        if set_output:
+            df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(
+                lambda lst: {word for word in lst if word not in stop_words})
+            df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(
+                lambda lst: {lemmatizer.lemmatize(word) for word in lst})
+        else:
+            df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(
+                lambda lst: [word for word in lst if word not in stop_words])
+            df_to_prep[lemmatized_column] = df_to_prep[lemmatized_column].apply(
+                lambda lst: [lemmatizer.lemmatize(word) for word in lst])
 
     return df_to_prep
 
@@ -486,8 +492,8 @@ def sentiment_graphing_simple(df_to_analyze):
     ax1.set_xlim([datetime(2014,1,1), datetime(2022,11,1)])
 
 
-def topic_analysis(tokenized_lemma_df: pd.DataFrame, target_lemma_token_columns: list[str], num_words: int = 4,
-                   num_topics: int = 10, passes: int = 10) -> dict:
+def topic_analysis(tokenized_lemma_df: pd.DataFrame, target_lemma_token_columns: list[str], subject: str, num_words: int = 4,
+                   num_topics: int = 10, passes: int = 10) -> (dict, gensim.models.ldamodel.LdaModel):
     """Conduct Latent Dirichlet allocation analysis againt provided tokenized and lemmatized data.
 
     https://radimrehurek.com/gensim/models/ldamodel.html
@@ -529,11 +535,11 @@ def topic_analysis(tokenized_lemma_df: pd.DataFrame, target_lemma_token_columns:
         
         topics = lda_model.show_topics(formatted=False)
         
-        fig, axes = plt.subplots(2, 2, figsize=(10, 10), sharex=True, sharey=True)
+        fig, axes = plt.subplots(2, 2, figsize=(10, 10), sharex='all', sharey='all')
         
         for i, ax in enumerate(axes.flatten()):
             fig.add_subplot(ax)
-            fig.suptitle('%s %s Top Topics' % (subreddit,content_title), fontsize='xx-large')
+            fig.suptitle('%s %s %s Top Topics' % (subreddit, subject, content_title), fontsize='xx-large')
             topic_words = dict(topics[i][1])
             cloud.generate_from_frequencies(topic_words, max_font_size=300)
             plt.gca().imshow(cloud)
@@ -545,10 +551,10 @@ def topic_analysis(tokenized_lemma_df: pd.DataFrame, target_lemma_token_columns:
         plt.margins(x=0, y=0)
         plt.tight_layout()
         plt.show()
-    return results
+    return results, lda_model
 
 
-def run_subreddit(data: Union[pd.DataFrame, SubredditData], subreddit: str) -> None:
+def run_subreddit(data: Union[pd.DataFrame, SubredditData], subreddit: str):
     """Runs all analysis against a subreddit using raw subreddit data. Cleans/Tokenizes/Lemmatizes data as necessary.
 
     :param data: Pandas DataFrame or reddit_data.SubredditData that contains submissions from PMAW
@@ -581,7 +587,7 @@ def run_subreddit(data: Union[pd.DataFrame, SubredditData], subreddit: str) -> N
 
     # Question Topic Analysis
     topic_df = privacy_questions(df, ['title'])
-    topic_filters = ['gdpr', 'ccpa', 'private', 'privacy']
+    topic_filters = ['gdpr', 'ccpa', 'private', 'privacy', "general data protection regulation", "ccpr", "califronia consumer privacy act", "california consumer privacy regulation"]
     topic_df['topic_mask'] = topic_df['lemmatized_title'].apply(lambda x: any(topic in x for topic in topic_filters)) | \
                              topic_df['lemmatized_body'].apply(lambda x: any(topic in x for topic in topic_filters))
     # Setup data for an overall topic set and pre/post ccpa/gdpr sets
@@ -590,16 +596,21 @@ def run_subreddit(data: Union[pd.DataFrame, SubredditData], subreddit: str) -> N
     post_ccpa_privacy = topic_df[topic_df['created_utc'] > CCPA_DATE].copy()
     pre_gdpr_privacy = topic_df[topic_df['created_utc'] <= GDPR_DATE].copy()
     post_gdpr_privacy = topic_df[topic_df['created_utc'] > GDPR_DATE].copy()
-    privacy_topics = topic_analysis(topic_df, ['lemmatized_title', 'lemmatized_body'])
-    pre_ccpa_privacy_topics = topic_analysis(pre_ccpa_privacy, ['lemmatized_title', 'lemmatized_body'])
-    post_ccpa_privacy_topics = topic_analysis(post_ccpa_privacy, ['lemmatized_title', 'lemmatized_body'])
-    pre_gdpr_privacy_topics = topic_analysis(pre_gdpr_privacy, ['lemmatized_title', 'lemmatized_body'])
-    post_gdpr_privacy_topics = topic_analysis(post_gdpr_privacy, ['lemmatized_title', 'lemmatized_body'])
+    privacy_topics, lda = topic_analysis(topic_df, ['lemmatized_title', 'lemmatized_body'], subject='All')
+    pre_ccpa_privacy_topics, pre_ccpa_lda = topic_analysis(pre_ccpa_privacy, ['lemmatized_title', 'lemmatized_body'], subject='Pre-CCPA')
+    post_ccpa_privacy_topics, post_ccpa_lda = topic_analysis(post_ccpa_privacy, ['lemmatized_title', 'lemmatized_body'], subject='Post-CCPA')
+    pre_gdpr_privacy_topics, pre_gdpr_lda = topic_analysis(pre_gdpr_privacy, ['lemmatized_title', 'lemmatized_body'], subject='Pre-GDPR')
+    post_gdpr_privacy_topics, post_gdpr_lda = topic_analysis(post_gdpr_privacy, ['lemmatized_title', 'lemmatized_body'], subject='Post-GDPR')
     pd.DataFrame(privacy_topics).to_csv('Outputs/%s_top_topics.csv' % subreddit)
     pd.DataFrame(pre_ccpa_privacy_topics).to_csv('Outputs/%s_pre_ccpa_top_topics.csv' % subreddit)
     pd.DataFrame(post_ccpa_privacy_topics).to_csv('Outputs/%s_post_ccpa_top_topics.csv' % subreddit)
     pd.DataFrame(pre_gdpr_privacy_topics).to_csv('Outputs/%s_pre_gdpr_top_topics.csv' % subreddit)
     pd.DataFrame(post_gdpr_privacy_topics).to_csv('Outputs/%s_post_gdpr_top_topics.csv' % subreddit)
+    topic_results = {'All': (privacy_topics, lda),
+                     'Pre_CCPA': (pre_ccpa_privacy_topics, pre_ccpa_lda),
+                     'Post_CCPA': (post_ccpa_privacy_topics, post_ccpa_lda),
+                     'Pre_GDPR': (pre_gdpr_privacy_topics, pre_gdpr_lda),
+                     'Post_GDPR': (post_gdpr_privacy_topics, post_gdpr_lda)}
 
     # Word Frequency Analysis
     word_frequency_analysis(df, subreddit)
@@ -608,6 +619,7 @@ def run_subreddit(data: Union[pd.DataFrame, SubredditData], subreddit: str) -> N
     # sentiment_graphing(df, subreddit, ["created_utc", "title_sentiment", "body_sentiment"])
     sentiment_graphing_simple(df)
 
+    return topic_results
 
 def run_project(fetch_data: bool = False) -> None:
     """Conducts all analysis against all configured subreddits. Warning: Fetching data will take hours.
@@ -615,9 +627,12 @@ def run_project(fetch_data: bool = False) -> None:
     :param fetch_data: If true new data will be fetched with PMAW; if false exisitng zip data will be used.
     """
     subreddits_config = get_subreddit_config()
+    subreddit_topics = {}
 
     for subreddit_config in subreddits_config:
         subreddit = subreddit_config['subreddit']
+        # if subreddit != 'webdev':
+        #     continue
         subreddit_data = SubredditData(subreddit=subreddit, reddit_data_type='submissions')
         if fetch_data or subreddit_config['fetch_data']:
             # This line looks for a praw.ini config file in your working directory
@@ -629,10 +644,11 @@ def run_project(fetch_data: bool = False) -> None:
             after = int(datetime.strptime(subreddit_config['after'], '%m/%d/%Y').timestamp())
             subreddit_data.fetch_new_data(api_instance=api, before=before, after=after)
         else:
-            subreddit_data = subreddit_data.load_data(subreddit_config['submissions_data_path'])
+            subreddit_data.load_data(subreddit_config['submissions_data_path'])
 
-        run_subreddit(subreddit_data, subreddit)
+        subreddit_topics[subreddit] = run_subreddit(subreddit_data.data, subreddit)
+    return subreddit_topics
 
 
 if __name__ == "__main__":
-    run_project()
+    all_runs = run_project()

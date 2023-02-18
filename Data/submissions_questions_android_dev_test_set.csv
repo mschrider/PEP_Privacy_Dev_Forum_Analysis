@@ -1,0 +1,1176 @@
+subreddit,name,title,selftext,question label
+androiddev,t3_c76ix2,Allow Wi-Fi Multicast Reception!,"Firstly im not a dev or anything at all about programming or making apps im just looking for a answer to a question if anyone would be kind enough to answer in the most simplistic terms.
+
+Recently I've been interested in a app its a drum app a very good drum app but the dev has set dodgy permissions like allowing camera access and gps location which doesn't make sense at all for a Drum app! 
+
+Those i can block the permissions too on android but there's a permission i cannot block called Allow Reception of Wi-Fi Multicast which from the few descriptions ive read online as non app developer and looking at the other nonsensical permissions seem very suspicious! 
+
+So please could somebody possibly explain this permission like im a 5 year old and tell me if its safe? 
+
+
+Sorry for hassle and thanks for your time.",1
+androiddev,t3_adgy0u,How to stop a service that is both bound and started?,"I've tried `unbindService()` while overriding `onStop()`, `onDestroy()` but the service is still there. I can't seem to make it go away.
+
+&#x200B;
+
+also:   
+
+
+`override fun onNotificationCancelled(notificationId: Int) {`  
+`stopSelf()`  
+`}`",1
+androiddev,t3_kv2jsw,"New year, faster builds","Great article by Haris Houlis showing how to speed up Gradle builds.
+
+[https://houlisha.medium.com/new-year-faster-builds-dc555f75f2fc](https://houlisha.medium.com/new-year-faster-builds-dc555f75f2fc)
+
+via [https://androidboss.com](https://androidboss.com)",0
+androiddev,t3_jtj2o5,Any way to flag this review for removal? It's dramatically affecting the rating of my app and is obviously comple unrelated,,1
+androiddev,t3_wmh8jn,How to check a variable in another fragment?,"So I have a Fragment that contains: A stepper (shows the progress of the user), a FragmentContainer to display the Fragments, and a button, to go to the next Fragment. Something like this:
+
+&#x200B;
+
+&#x200B;
+
+https://preview.redd.it/k3l6jzyk79h91.png?width=800&format=png&auto=webp&s=3710e4e8feee9161d7e70415f953cf225f9ca162
+
+Now my question is... Whenever I'm on a fragment, the user has to upload a picture, or check/select a card view for instance. I want the ""Next"" button (which is on another fragment) to be disabled unless the user has uploaded pictures, selected certain fields.  
+
+
+What's the best way to achieve this? Should I use a SharedViewModel on this case? I'm not that familiar with ViewModels so I'm not sure if it's a  good practice to use them like mentioned.",1
+androiddev,t3_t3m04f,India's Beast Academy For Professional Makeup & Hair Artist Courses in Mumbai,,0
+androiddev,t3_owyxch,ViewModel and Fragment,"I have a couple of questions regarding viewmodel and fragment as I couldn't find my answers online.
+
+Let's assume we have a fragment and inside of it we do:
+
+     private val viewModel by viewModels<UsersViewModel>()
+
+As I understood, here we use the extension method `viewModels()` which will create an instance of the class `UsersViewModel` ....  So let's say in the `UsersViewModel` I have:
+
+        private val userLiveData = MutableLiveData<MutableList<UserResponse>>()
+        private val dataStatusLiveData = MutableLiveData<Int>()
+    
+    
+        fun getUsers(): MutableLiveData<MutableList<UserResponse>> {
+            return userLiveData
+        }
+    
+        fun getDataStatus(): MutableLiveData<Int> {
+            return dataStatusLiveData
+        }
+    
+     init {
+            loadUsers()
+        }
+    
+        private fun loadUsers() {
+            viewModelScope.launch {
+                dataStatusLiveData.postValue(View.VISIBLE)
+                    val users = repository.fetchAllUsers()
+                    when (users.isSuccessful) {
+                        true -> {
+                            if (users.body() != null) {
+                                usersLiveData.postValue(countries.body())
+                                dataStatusLiveData.postValue(View.GONE)
+                            }
+                        }
+                        else -> {
+                            dataStatusLiveData.postValue(1)
+                        }
+                }
+            }
+        }
+
+And in Fragment I have:
+
+        private fun setUpUserList() {
+            adapter = usersView.adapter as UserAdapter
+            viewModel.getUser().observe(viewLifecycleOwner, { userList ->
+                adapter.setUserList(userList)
+                })
+            observeStatus()
+            }
+    
+        private fun observeStatus() {
+            viewModel.getDataStatus().observe(viewLifecycleOwner, { status ->
+                when(status){
+                    0 -> {
+                        progressBar.visibility = View.VISIBLE
+                    }
+                    8 -> {
+                        progressBar.visibility = View.GONE
+                    }
+                    1 -> {
+                        Toast.makeText(context,getString(R.string.errorMsg),Toast.LENGTH_SHORT).show()
+                    }
+                }
+            })
+        }
+
+&#x200B;
+
+1. When this is called  `private val viewModel by viewModels<UsersViewModel>()`  does it call the `init` block since it's creating an instance of it? Or when `getUser().observe(..)`  does it call the `init` block and observes the data?
+2. Inside `loadUsers` I'm using a `liveData` for status and for the data I'm getting from the web service. If let's say I comment this call `observeStatus()`  in fragment, why doesnt `getDataStatus()` observe the status?",1
+androiddev,t3_fu8xis,Confusion regarding learning android development and cross platform development,"Hello there!
+I've started learning android development using Java few months ago. I am almost in the middle of the course. I just came across Flutter and React Native through which you can develop cross platform apps for Android and iOS. My confusion is that should I continue learning android development using Java or should I start learning Flutter or React Native right from scratch?",1
+androiddev,t3_opyk4g,Bridal Makeup Course- Learn Best Bridal Makeup Course In Mumbai | BSMH,,0
+androiddev,t3_wuwzcs,MVI with State-Machine - Part 3: Modules,,0
+androiddev,t3_l1whsa,"How to dynamically update a Recycler View item from network while in is in view? Eg. Number of likes, comments in a Tweet","Hey , I was wondering how to update data in Recyclers dynamically in the most efficient way,like in  the App twitter Each tweet will have number of retweets , likes etc changing by the time the specific tweet is in view.    
+
+So how would you update those items in the recycler with the latest number of likes ?
+
+To add more complexity, how would you then handle if the user presses ""Like"" and now you'd have to send a network request which probably will return the latest number of likes and now you'd need to update the number of likes of only that specific tweet.   
+
+I am trying to accomplish this using flows api, any ideas/suggestions/ Open source projects  will be helpful.  
+
+Thank you!",1
+androiddev,t3_fvlxvs,Mvvm with java and without dagger,"is there an example out there or a github repo that show how to do mvvm without dagger
+i am using rxjava databinding retrofit and room
+i've searched alot but havent found anything similar",1
+androiddev,t3_b04jdz,Simple Android Registration app with Toast Message Part 1,,0
+androiddev,t3_ff7a06,adb backup restore stuck on se.dirac.acs,"I had backed up all my files/apps using adb backup earlier but now when i try to restore the backup, it gets stuck on se.dirac.acs indefinitely and doesn't let me restore. 
+I have tried android backup extractor to unpack the backup, delete se.dirac.acs then repack it but that just instantly stops the backup restore :/
+
+Any help would be greatly appreciated",0
+androiddev,t3_2uvu02,Resizing bitmaps to save to disk (not for displaying),"I looking for a way that I can take an image from disc that might be pretty large, scale it down, and save what might still be a pretty large image back to disc without running out of memory.
+
+I'm not trying to display the bitmap, just resize and save it.
+
+I know that I can sample the bitmap and load it at a smaller size, but this doesn't prevent OOM if the destination bitmap is still too large to allocate in memory. Are there any solutions out there that would enable me to do this without allocating the entire bitmap? Preferably without using the NDK.
+
+Ta",1
+androiddev,t3_eddw6k,App ad disapproved for 'Misleading Content',"OK, so despairing of ever seeing my app in organic search results, I decided I would have to resort to advertising to get anyone to ever see the thing, so I created a mobile app campaign, only to have its only ad rejected for the aforementioned reason
+
+There are two 'headline ideas':
+
+'Music Notation'
+
+'Free Composition App'
+
+and one 'description idea':
+
+'Write Music on your phone!'
+
+Each one of these phrases is 100% literally true and accurately describes the function of the app. It will surprise no-one to learn that the email gave no indication which phrase was problematic, or indeed whether the problem was something else.
+
+Has anyone had anything similar, and how do you go about finding out what the problem is?
+
+&#x200B;
+
+Edit: Link to app:
+
+[https://play.google.com/store/apps/details?id=com.philblandford.ascore](https://play.google.com/store/apps/details?id=com.philblandford.ascore)",1
+androiddev,t3_nyka7h,Android Emulator and Intel HAXM issues,"Greetings,
+
+I'm experiencing  issues using the Android Emulator in Android Studio.
+
+The virtual devices won't load. I try to manually open the Android test device and drag files to that, however, I get an error that my Test App is stopping immediately.
+
+Also, the emulator states that it could not locate the ADB file.
+
+I've confirmed that the Hyper-V features withing Windows 10 are not installed.
+
+AMD-V is enabled in the BIOS.
+
+I'm not able to install the HAXM driver via the SDK Tools. Android SDK tools, platform tools and Emulator and AMD Hypervisor Driver are installed according to Android Studio.
+
+When attempting to install the HAXM driver, I receive errors that this is only be supported on Windows or Mac. I have Windows 10.
+
+I've also attempted to install the HAXM driver from Github latest build.
+
+What software do I need to install for this to function properly? What steps should I take to ensure that the ADB file is recognized by the Emulator?  I have installed the ADB server and updated my Windows Environment Variables.
+
+Finally; I should note that VirtualBox is installed. Could that be causing an issue?",1
+androiddev,t3_2n2ks2,Indoor Positioning SDK for Android announced by CSR,,0
+androiddev,t3_27idsl,"The game that i was developing! Dr Dokor, there's a cat on his head - your argument is invalid",,0
+androiddev,t3_ufm6v,Testing App Logic with fake Contexts,"Hey,
+
+I have a class in my Application which gets Information from a website and returns ListAdapters. But that class still has some errors. Now I want to test that Class without having to start my Application just in eclipse like a normal Java Class. But that my class uses a context and needs to be able to create ListAdapters. How can I do that?
+",1
+androiddev,t3_8riy05,Is there a way to display .mha file format on android?,I am trying to create an app to display .mha files on android is there a way to do so?,1
+androiddev,t3_2lbdcv,Get icons as indie dev?,"So I am at this point again : I am near to publishing a new app. Most of the gui is already done by myself. However, I see myself not able to create a nice material design icon for the app. It's such an important part of an app, which seems to be so hard to get done right. 
+So to all the indie devs, who don't have their own design team: where do you get your icons from? It should be cheap, but still professionally made and good looking. ",1
+androiddev,t3_71kxbg,Google is buying part of HTC’s smartphone team for $1.1 billion,,0
+androiddev,t3_qkkm2l,Compose for Wear OS: Navigation,,0
+androiddev,t3_4nh7cw,Understanding the RxJava switchMap operator,,0
+androiddev,t3_8sebp5,Realtime Location Tracking Uber/Lyft Android Demo using PubNub,,0
+androiddev,t3_97v157,"From an Android app development perspective, what's the difference between enabling support for Samsung DeX and Chrome OS?","Per [Samsung DeX's technical documentation](https://developer.samsung.com/samsung-dex#techdocs), it uses standard Android APIs, which makes supporting it theoretically seamless. Does Chrome OS use the same APIs? What's the difference in difficulty and complexity of developing an Android app that supports one as opposed to the other?",1
+androiddev,t3_9qplgc,Should a ViewModel observe another ViewModel?,"Suppose I have a “wizard”/“workflow” where an activity hosts multiple successive fragments (perhaps through a ViewPager or the Navigation component). There exists an ActivityViewModel (mostly for navigation), as well as a FragmentOneViewModel, a FragmentTwoViewModel, a FragmentThreeViewModel, etc.
+
+If conditional navigation is dependent on data from multiple fragments in the flow, how does the ActivityViewModel become aware of changes in the fragments’ data? Using the activity as a passthrough object seems wrong, because it means the activity sees things it doesn’t care about (or shouldn’t know about), and it means making changes in more than one place if the ActivityViewModel needs access to a new piece of information in the flow.
+
+Is there anything wrong with the ActivityViewModel “observing” the LiveData of the fragments’ ViewModels (i.e. the activity ultimately observes a LiveData from the ActivityViewModel, which comes from LiveData transformations)? This seems like the cleanest way to expose only the minimum necessary data to each component in the architecture.
+
+This is assuming all of the ViewModels are scoped to the lifetime of the activity. ",1
+androiddev,t3_9rzhkq,Recommend cool LIGHT android studio theme?,,1
+androiddev,t3_abiko8,How should I make methods that rely on activity and layouts accessible from anywhere?,"I have a helper class called ""viewHelper()"" which deals with view manipulation like adding, deleting, checking for parents etc. Since all these actions require a context and a layout I gave the viewHelper a constructor of this and ConstraintLayout.  
+
+
+My problem is - what do I do when I want to manipulate views outside of the activity that initializes the helper? Example:
+
+        public class CalculationScreen {
+            ViewHelper viewHelper = new ViewHelper(this, constraintLayout);
+            //Do I just pass them as constructors every time? seems sloppy and not DRY
+            AnimateableImages = new AnimateableImages(this, constraintLayout);
+        }
+        public class AnimateableImages{
+            /*Constructors*/
+            //How do I make the context and layout accessible to every instance of viewhelper?
+            ViewHelper viewhelper = new Viewhelper(this, constraintLayout)
+            
+        }
+
+&#x200B;",1
+androiddev,t3_sjg5xc,Personal Makeup- Learn Professional Personal Makeup In Mumbai,,0
+androiddev,t3_azp76x,Push a website link by push notification in android,**I wanna push different website url as marketing purpose by push notification in android app. Is is violating any policy of google play?**,1
+androiddev,t3_56a0cs,"Is there any app that acts like a ""Pseudo SQL server"" without root, just so I can practice SQL code during class with my tablet?","My databases class use SQL and almost everyone brings their laptop. Sadly, I don't have a working laptop but use a desktop and my parents can't afford to buy one right now, which would be useless after this class ends. I have an android tablet with a keyboard that I use for all my remote stuff.
+
+Sadly, I can't use it to connect to my computer, because my school's network restricts some connections.
+
+Basically, I need an app to type down those SQL codes and check if I typed them right, not an app that will create a database but a pseudo database that only acts as a way to check if my SQL code is correct and would probably work fine.",1
+androiddev,t3_u78ofh,All You Need for MVI is Kotlin. How to Reduce Without a Reducer?,,1
+androiddev,t3_o9s0fy,ViewModel as a variable in XML,"I'm studying ""Android App Development with Kotlin"" by Google at Udacity. In one of the lessons, you are taught how to handle clicking items from a RecyclerView in the fragment, using a callback function, like this: `val clickListener: (sleepId: Long) -> Unit)` , and from the fragment calling any methods of your ViewModel. Studying this project [https://github.com/android/architecture-samples](https://github.com/android/architecture-samples), the pattern used to handle clicks is to send the ViewModel to the ViewHolder and add it to the binding as a variable and make all the XML method calls, like this: `android: onClick = ""@{viewModel.taskComplete(task)}""`.Performatively, which of these ways is faster?",1
+androiddev,t3_bzov7l,Saket Narayan - Behind the scenes of building a gesture driven Reddit app,,0
+androiddev,t3_xw500x,Text-to-speech working intermittently when screen is off?,"I have an application that works with a companion device. There's a constant connection between the two, and everything works correctly - however, text-to-speech (TTS) does not.
+
+In this case, TTS should be invoked at specific intervals (say, once every minute). When the screen is off and phone is not connected, TTS works only for a while. After that, it starts to queue up the TTS utterances, usually playing once it has two messages queued up, but in some cases, it queues them up until screen is turned back on, uttering all the messages in sequence.
+
+I've investigated this quite a bit, but haven't found any solutions. I wrote a log-to-file utility to log stuff because connecting to adb makes the issue go away. Based on my logging, the app code works as intended even when the utterances start to be delayed. textToSpeech.speak() is invoked correctly, it's just that sound doesn't come out.
+
+The only thing I've noticed is that utterance progress listener gets invoked correctly when speech is done normally (onSpeakStart first, onSpeakStop after utterance), but in the problem case, only onSpeakStart gets invoked. After that, nothing happens until the next message that may or may not trigger the speech once again. In this case, onSpeakStart is invoked again, but not onSpeakStop gets also invoked correctly.
+
+My reasoning here is that the TTS service gets put down by Doze, but there's no way to affect this. The app is working correctly through Doze and whatnot, it's only the TTS invocation that stops working after a while.",1
+androiddev,t3_d51953,Implement P2P - Wifi-Direct vs Bluetooth,"Hi. I need to implement a P2P communication between devices so I must choose between Wifi-Direct and Bluetooth.   
+
+
+Requirements of my app:   
+\- Groups frequently changing.   
+\- Each peer can belong to 1 or more groups.   
+\- Each peer must be able to send/receive data from every other peer. 
+
+I'm running low on time, so I would also prefer the ""easiest to implement"" solution. 
+
+Giving this requirements, should I use WD or Bluetooth? By searching a bit, looks like I would have some problems  with Wifi-Direct Group Owners.  Is Bluetooth a better solution for this? 
+
+&#x200B;
+
+Thanks!",1
+androiddev,t3_89zuhk,"[Google Africa Scholarship Program] 15,000 scholarships for Africans to learn to develop Android apps",,0
+androiddev,t3_5yes80,Step-by-step manual for Android App developers newbies,,0
+androiddev,t3_nqkkw,Android UI Design Pattern - Expand in Context,,0
+androiddev,t3_8naawh,Play Store Subscriptions for Android — What’s new in 2018?,,1
+androiddev,t3_uanplx,Make dynamic videos of Andriod App Development | After effects,,0
+androiddev,t3_60mqpf,6 Tips to improve your mobile app security,,0
+androiddev,t3_6pmm6n,A complete idiot’s guide to Clean Architecture,,0
+androiddev,t3_5n8xh3,Differentiating between a great idea and a terrible idea for an app,,0
+androiddev,t3_7596fm,Surviving Configuration Changes - DIY,,0
+androiddev,t3_cd6d7o,Object creation syntax in Java.,"Hello! I've been working on super simple apps on Android lately, and I notice in the tutorials I've seen, the object creation syntax for Java is kinda different to what I've learnt in books?
+
+
+For example, this Java code to display a message on Android:-
+
+
+
+
+    public void displayMessage(String message) {
+
+        TextView messageTextView = findViewById(R.id.Price_text_view);
+        messageTextView.setText(message);
+
+    }
+
+
+
+
+An object of TextView was created with this syntax:
+
+
+
+```        TextView messageTextView = findViewById(R.id.Price_text_view);```
+
+
+
+But this looks new to me, is this just another way of typing:
+
+
+```TextView messageTextView = new TextView();```
+
+
+```TextView.findViewById(R.id.Price_text_view);```
+
+
+
+
+?
+
+
+
+If that's the case, then the second version of the object creation actually doesn't work... it's expecting me to put something in the parameters of TextView and I can't for the life of me figure out what it is.
+
+
+
+
+
+Oh, and while I have your attention, what's this R class exactly?",1
+androiddev,t3_90vy9y,My readings of the week #3 – Gahfy 🇫🇷 🇹🇭 – Medium,,0
+androiddev,t3_9j6w7h,Question about selecting elements,"So I asked a question about Bluetooth and realized I was nowhere near ready for that stuff yet but I want to know what is it called when you select an item from a list view and the app transitions into an activity. So if this seems vague I am following the google udacity course and dont know too much about android yet. I am making a tour guide app that will preview images that the user can see and then once they press the selected item the screen transitions to a full description. A link to a google doc would be greatly appreciated.
+
+Thanks so much",1
+androiddev,t3_rnpf9n,Stacky Scramble Mod APK 3.0.1 (No promotions),,0
+androiddev,t3_49q6xv,https://www.google.com/android/beta is live,,0
+androiddev,t3_blbppz,"Weekly ""who's hiring"" thread!","Looking for Android developers? Heard about a cool job posting? Let people know!
+
+Here is a suggested posting template:
+
+> Company: <Best Company Ever>  
+> Job: [<Title>]\(https://example.com/job)  
+> Location: <City, State, Country>  
+> Allows remote: <Yes/No>  
+> Visa: <Yes/No>  
+
+Feel free to include any other information about the job.",0
+androiddev,t3_4xiirm,Is there any Clean Architecture project with updated libraries?,"I am currently looking for Clean Architecture project: - that uses Dagger2, Retrofit2 , RxJava, - has good examples for usecases - has good UI and unit tests.
+Any suggestion? Please, do not answer with ,, google it "", I am sick of it :D",1
+androiddev,t3_7470ip,I have a question to the self employed developers here. How much time do you spend actually on programming and how much on customer acquisition?,"I need to do some calculations towards a possible self employment as a freelancer and would like to have some numbers based on real experiences.
+
+If you start out as a freelancer for Android how much time in percent would you say you are coding (and charging the customer for) how much are you spending on organisation and looking for new projects and doing other stuff? I'm assuming an 8 hour workday. So don't include leisure time.",1
+androiddev,t3_9zbtd2,10 Steps To Publish Your Android App on Google Play Store,,0
+androiddev,t3_37t42f,Google's Cloud Test Lab signup is now available in the Developer Console.,"Just noticed that Google's Cloud Test Lab is now available for signup in the developer console. Here is what it says:
+
+&nbsp;
+> ANNOUNCING: GOOGLE CLOUD TEST LAB
+
+>The Google Cloud Test Lab will test your app on a wide range of the most popular physical Android phones and tablets.
+
+>As you publish APKs to the Play alpha and beta tracks they will be automatically sent to our device lab without requiring you to make any changes.
+
+>The Cloud Test Lab service will install your app and then create user-like interaction with it, tapping and dragging on the screen to explore reliability across diverse hardware. Reports on the test, including screenshots and full debugging traces for any issues uncovered, can be viewed right here in the Play Developer Console.
+",0
+androiddev,t3_305ruh,Good sites for android UI Controls,I'm new to Android development and wanted to ask the community of any good sites to that have Android UI controls  that can be used in my projects. I've been searching Github but wanted to ask if there are any sites that have only android UI controls. Thanks for any help.,1
+androiddev,t3_2t5bp2,Android Application Development Services Used Business Verticals,,0
+androiddev,t3_i38ewc,How do you manage (copy) string resources?,"Curious how others manage language strings for their apps. From what I've seen small/indie projects often hard code them to speed things up. On the other end of spectrum are big products where it gets really complicated, mostly driven by the need to handle complex translation workflows. Interesting to see what others do.
+
+[View Poll](https://www.reddit.com/poll/i38ewc)",1
+androiddev,t3_ev0xl,"If you have win 7 32bits, and android usb drivers revision 4, could you upload them? Please?","[Cross-post from r/programming]
+I've got a weird problem and my avd manager can't seem to find the usb-driver package, thus leaving me with my pants down because I can't get the drivers any other way.  
+
+If any of you have the revision 4 drivers downloaded, you'd do me a huge favor if you could upload them somewhere or email them to me. Really.   
+
+Thanks reddit.",1
+androiddev,t3_3b7crp,[Lib] RippleDecoratorView - Configurable Ripple and Highlight effect backwards compatible with up to Android-7,"Hi /r/androiddev!
+
+This is a new account to announce one of the Android library projects we are hoping to launch in the coming months from within Thomson Reuters.
+
+RippleDecoratorView is a widget library with a view used to wrap any of your layouts. It allows you, for any touch, to add animations effects such as: ripple stroke, ripple fill, highlight, and zoom. These animations come with a configurable fade-in, fade-out timeline.
+
+It does not capture touches, so you can pepper it safely though your XML layout files.
+
+It comes with an example project and is already available at Maven Central.
+
+GIF GOODIES! http://i.imgur.com/PtHceGT.gifv
+
+Github Repository: https://github.com/thomsonreuters/RippleDecoratorView
+
+And if you want a q&d introduction, just add to your dependencies
+
+    compile 'com.thomsonreuters:rippledecoratorview:+'
+
+and wrap any of your views with
+
+    <com.thomsonreuters.rippledecoratorview.RippleDecoratorView
+      android:layout_width=""wrap_content""
+      android:layout_height=""wrap_content"">
+
+        <Button
+            android:layout_width=""wrap_content""
+            android:layout_height=""wrap_content"" />
+
+    </com.thomsonreuters.rippledecoratorview.RippleDecoratorView>
+
+If you feel the library can be extended or you find any bugs, do not hesitate to fill in a request or branch and PR your changes.",0
+androiddev,t3_bjme7w,Android Studio Actions shortcut no longer working,"After updating to the latest Android Studio version, whenever I press shft+cmd+a to access the Actions menu, I get this terminal window that I've never seen.
+
+&#x200B;
+
+I checked my AS shortcuts and keybindings and everything seems right.
+
+&#x200B;
+
+Anyone have a clue? 
+
+&#x200B;
+
+&#x200B;
+
+https://preview.redd.it/vxeswhznynv21.png?width=601&format=png&auto=webp&s=b66f71697baf07a283e3517b8bc0cfbc850e5b34",1
+androiddev,t3_w54ldk,Want to start with Jetpack Compose?? Here is your first step,,0
+androiddev,t3_hv1rkq,Got something awesome for beginner and intermediate android developers.,,0
+androiddev,t3_ieai6,A Magical Moment for this Android Nerd!,,0
+androiddev,t3_ivydiw,I need help with hilt and robolectric setup,"I'm following [https://developer.android.com/training/dependency-injection/hilt-testing](https://developer.android.com/training/dependency-injection/hilt-testing)and there's a line I add to configure tests which fails my build
+
+    hilt {
+        enableTransformForLocalTests = true
+    }
+    
+
+and I guess this error
+
+&#x200B;
+
+[error snippet](https://preview.redd.it/jokbz9vph5o51.png?width=598&format=png&auto=webp&s=b63f6d47ca309d5507765df3ed61a8d93c1534c7)
+
+I'm using this file to test the integration out
+
+    @HiltAndroidTest
+    @RunWith(RobolectricTestRunner::class)
+    @Config(application = HiltTestApplication::class)
+    class SomeTest {
+    
+        @get:Rule
+        var hiltRule = HiltAndroidRule(this)
+    
+        @Test
+        fun `should display`(){
+            val activityController = Robolectric.buildActivity(MainActivity::class.java)
+            assert(true)
+        }
+    }",0
+androiddev,t3_bqwb7n,Android Q: 13 New Features of the Latest Android Update You Must Know,,0
+androiddev,t3_cy545l,Can I safely add someone to Firebase without knowing whether they've been banned or had strikes on the Play Store before?,"I need to allow a dev access my Firebase so they can look at crashes. If they've been banned or had strikes on the Play Store before, would that affect me? I don't know if they have had issues before on the Play Store, nor does it seem like something that I should be concerned about when hiring someone.
+
+&#x200B;
+
+Edit: From the replies it seems like I'm not crazy to fear this and I should probably just find a new crash reporting service, right?",1
+androiddev,t3_telauj,Moving Circle,"Hi everyone I hope that you're doing good. I have a CustomView which should be a moving circle. Previously I saved coordinates from Sensor. And I want to simulate this coordinates in my DetailFragment. (Example Video is below. It moves by  SensorManager)  
+
+
+Here are my codes;
+
+CustomView -> [https://gist.github.com/theazat/6c9650a362f7a1c59400a4eb456cb654](https://gist.github.com/theazat/6c9650a362f7a1c59400a4eb456cb654)
+
+Detail Screen (must show in this screen) -> [https://gist.github.com/theazat/8e8972b624920c9bc96b54917902fd2c](https://gist.github.com/theazat/8e8972b624920c9bc96b54917902fd2c)  
+
+
+XML -> [https://gist.github.com/theazat/a7a73bf29c89bb5fa466f45b27dd9178](https://gist.github.com/theazat/a7a73bf29c89bb5fa466f45b27dd9178)  
+
+
+X Coordinates -> [https://gist.github.com/theazat/4b999836a02ce82c22c778f0f9f860c2](https://gist.github.com/theazat/4b999836a02ce82c22c778f0f9f860c2)  
+
+
+Y Coordinates -> [https://gist.github.com/theazat/d6a7979952af3d7be1fc939c128f3ec7](https://gist.github.com/theazat/d6a7979952af3d7be1fc939c128f3ec7)  
+
+
+What am I doing wrong?
+
+  
+
+
+https://reddit.com/link/telauj/video/ssv1th7uoin81/player",1
+androiddev,t3_szccr2,Using SharedPreferences to store user coins,"I'm wondering how safe is it to store something like user coins using SP?
+
+Can someone with a rooted phone change that value? I also plan to store some other data there but it is very important to me that that data can't be changed with a rooted phone for example, because based on that data user will be able(or not) to use some app features. 
+
+At the moment I fetch that data from my server but I would like to have that data much faster and not wait for it a few seconds.
+
+Thank you",1
+androiddev,t3_7atioa,"Cool & cute talk ""RxJava in Baby Steps"" by Annyce Davis",,0
+androiddev,t3_4hffc7,Mobile Caller True Locator,,0
+androiddev,t3_k9rmej,Top 12 Ways to Reduce Android App Size During App Development Lifecycle,,0
+androiddev,t3_2sk09n,Google doc/tutorial showing an asynctask doesn't work,"The google gcm docs show this method
+
+
+
+        /**
+         * Registers the application with GCM servers asynchronously.
+         * <p>
+         * Stores the registration ID and app versionCode in the application's
+         * shared preferences.
+         */
+        private void registerInBackground() {
+            new AsyncTask() {
+                @Override
+                protected String doInBackground(Void... params) {
+                    String msg = """";
+                    try {
+                        if (gcm == null) {
+                            gcm = GoogleCloudMessaging.getInstance(context);
+                        }
+                        regid = gcm.register(SENDER_ID);
+                        msg = ""Device registered, registration ID="" + regid;
+    
+                        // You should send the registration ID to your server over HTTP,
+                        // so it can use GCM/HTTP or CCS to send messages to your app.
+                        // The request to your server should be authenticated if your app
+                        // is using accounts.
+                        sendRegistrationIdToBackend();
+    
+                        // For this demo: we don't need to send it because the device
+                        // will send upstream messages to a server that echo back the
+                        // message using the 'from' address in the message.
+    
+                        // Persist the regID - no need to register again.
+                        storeRegistrationId(context, regid);
+                    } catch (IOException ex) {
+                        msg = ""Error :"" + ex.getMessage();
+                        // If there is an error, don't just keep trying to register.
+                        // Require the user to click a button again, or perform
+                        // exponential back-off.
+                    }
+                    return msg;
+                }
+    
+                @Override
+                protected void onPostExecute(String msg) {
+                    mDisplay.append(msg + ""\n"");
+                }
+            }.execute(null, null, null);
+            ...
+        }
+
+
+
+from here: https://developer.android.com/google/gcm/client.html
+
+
+but it wont compile
+
+I get an eerror message 
+
+`Class ""Anonymous class derived from AsyncTask"" must either be declared abstract or implement abstract method ""doInBackground(Params...)"" in ""AsyncTask"".",0
+androiddev,t3_qeq5rl,hello this is my vpn app in play store check it if you want,,0
+androiddev,t3_9eraf4,How did Epic Games solved the hijack bug discovered by Google?,"In the company where I'm currently working we are developing an app for internal distribution of our main app. In other words, we are developing a clone of HockeyApp.
+
+As you may remember, Google found a exploit to hijack the downloaded APK and disclosed it here (https://issuetracker.google.com/issues/112630336)
+
+Ok, now the thing is that we do not want to have the same problem as Epic Games had and that's why I started wondering how did they fix the disclosed issue or what steps we can take to avoid them.
+
+EDIT: I just saw this in the Google's issue tracker: ""This patch changes the default APK storage directory from external to internal storage, which should prevent MITD attacks during the install flow.""",1
+androiddev,t3_ans8kz,"Devs with G+ communities, where are you moving to?","Have 3 user communities, one of them is fairly large, I like to it from my app. Where do you suggest I move it? Personally I like that on G+ I get a notification as soon as there is a post and it is fairly easy to manage spam as well. ",1
+androiddev,t3_pwedg,Button-less emulator with the SDK?,"With the Android SDK, when I create a virtual device for 4.0, I get all the buttons on the right, and consequently I don't get the on-screen buttons like on the Galaxy Nexus. But I want to test to see how my actionbar behaves on the GNexus.
+
+Is there a way to do that with the Android SDK?",1
+androiddev,t3_jqtoxd,Should I use Room with LiveData?,Should I be returning a Livedata object from my Room DAO? Because if I do so then I would have a LiveData at the repository level which is again an anti pattern as far as I understand. What is the correct thing to do here?,1
+androiddev,t3_b22wwn,Android Bluetooth SSP,can anybody point me to resources for learning/getting started to handle Bluetooth SSP in Android. Something that is an easy introduction. ,1
+androiddev,t3_64gfg0,Android O is Breaking Apps that Overlay on top of the Status Bar,,0
+androiddev,t3_6rajve,suwhs/wATLlib - full text justify and hyphenation support,,0
+androiddev,t3_n17bk,Latest Technology Reviews,,0
+androiddev,t3_qd51cz,SaveInstanceState. Do you use it?,"Practically speaking, if you are using viewmodel, the only use case for save instance state is to handle system initiated process death.
+
+On iOS most apps when you come back after prolonged period of time, it starts in a fresh state. And many android app is the same.
+
+If you want to implement handling system initiated process death, you’d better implement it for majority of your app.
+
+For example, 
+Activity A - activity B - activity C.
+If you want to handle it for activity C, most likely you want to handle it for activity B. If you don’t, your activity C is recreated and you press back button your activity B could be in an inconsistent state.
+
+Practically how many of you actually even care to handle system initiated process death. It’s so much work for little gain and UX impact.
+
+Often times large complex app is really complex, and handling this for most activities and app wise states is just impractical. Also for large custom object, you need custom parcel logic…
+
+“For the truly desperate, you could do a check for a process death in the “OnCreate()” method of all your activities, and then re-launch your launcher activity.”",1
+androiddev,t3_6zf5hn,"Weekly ""who's hiring"" thread!","Looking for Android developers? Heard about a cool job posting? Let people know!
+
+Here is a suggested posting template:
+
+> Company: <Best Company Ever>  
+> Job: [<Title>]\(https://example.com/job)  
+> Location: <City, State, Country>  
+> Allows remote: <Yes/No>  
+> Visa: <Yes/No>  
+
+Feel free to include any other information about the job.
+",0
+androiddev,t3_tpiue2,Android Compose advantages over XML,"I am well verse working with XML including custom views for years, I created a module of delegate class which can improve the development and avoid writing boilerplate. Now with the introduction of Jetpack Compose I am wondering if I should dive in to it now or wait more until it became more mature. Currently I don't see yet the urgency to move in to since I think writing layout with XML is much cleaner and easier to understand. I wanna know stuff like can we also use Kotlin extension with Compose just like with regular View. What are the advantages and limitation as of 2022? Is it platform independent as well? What are the untold truth about Compose? Do we already have best practice or pattern to follow when using Compose? Answer based on actual experience is probably what I am looking for. Is it more friendly specially for beginner, I am afraid that juniors might find it more difficult than working with XML since many tutorials up to this date still uses XML.",1
+androiddev,t3_4zc8ay,"Questions Thread - August 24, 2016","This thread is for simple questions that don't warrant their own thread (although we suggest checking the sidebar, [the wiki](http://www.reddit.com/r/androiddev/wiki/), or [Stack Overflow](http://stackoverflow.com) before posting). Examples of questions:
+
+* How do I pass data between my Activities?
+* Does anyone have a link to the source for the AOSP messaging app?
+* Is it possible to programmatically change the color of the status bar without targeting API 21?
+
+**Important: Downvotes are strongly discouraged in this thread. Sorting by new is strongly encouraged.**
+
+Large code snippets don't read well on reddit and take up a lot of space, so please don't paste them in your comments. Consider linking [Gists](https://gist.github.com) instead.
+
+Have a question about the subreddit or otherwise for /r/androiddev mods? [We welcome your mod mail!](http://www.reddit.com/message/compose?to=%2Fr%2Fandroiddev)
+
+Also, please don't link to Play Store pages or ask for feedback on this thread. Save those for the App Feedback threads we host on Saturdays.
+
+Looking for all the Questions threads? Want an easy way to locate today's thread? Click [this link](https://www.reddit.com/r/androiddev/search?q=title%3A%22questions+thread%22+author%3A%22AutoModerator%22&restrict_sr=on&sort=new&t=all)!
+",1
+androiddev,t3_2z427h,"Persistent Search: A library that mimics the search box of Google Now, Maps & Play Store",,0
+androiddev,t3_3b6rcx,"Review/Critique of Square's ""Advocating Against Android Fragments""",,0
+androiddev,t3_6slq9z,Top 3 Augmented Reality Commercial Use Cases,,0
+androiddev,t3_6itnji,Looking for RockChip MPP examples (specifically 3399),"Hi everyone. It looks like FFMPEG recently added RK MPP support (http://opensource.rock-chips.com/wiki_Mpp) to Longchair and I know that other kodi branches and such are starting to use this too. 
+
+I was wondering if anyone had any basic hardware decoder OSAL playback examples that used the API in a standard application context (I'm thinking something like rk4kvideoplayer?) - and if this is possible what components would be needed in the vcodec service in an AOSP build?
+
+I think I'm pretty close but I can't marry the two and get acceleration out of my playback application. Gstreamer may be out of the question since I need layering.",1
+androiddev,t3_90a3uo,Play Store testing card-style search results with screenshot thumbnails,,0
+androiddev,t3_x3r3ni,Free Ned Gifts - Earn points and exchange them for free gift codes!,,0
+androiddev,t3_sdv9n5,Relationship between Firebase - Google Play Store,"For several months I've been using Firebase App Distribution successfully. I'd manually build application on my local computer and upload APK file manually to Firebase App Distribution so it's accessible to testers via App Tester application.
+
+I would like to use recommended AAB instead of APK and for that, I need Google Play Store. I created dev account and have access to GPS.
+
+I have trouble understanding following things:
+
+1. I have two Firebase projects (test + production), this means each Firebase project has its own mobile app that has different package ID (I build them with flavors with different Firebase configuration files). ""test"" project is only used for development and testing, the ""production"" project is for releases. Do I need to set up my test app in GPS as well? I only want to do it for test version of my app so I can do AAB builds.
+2. How do I connect Firebase Android App with GPS? I can't seem to find any kind of set up in GPS where it'd ask me for package ID.
+
+Maybe I'm misunderstanding Google Play Store Console, perhaps it's only used for release apps? Thank you.",0
+androiddev,t3_8n19ck,Bluetooth low energy,"Im not sure if this is the right place for this, but ive been working on an app that uses BLE to connect to an adafruit bluefruit flora device. The flora sends info out to be received by the app for manipulation. The issue is that there doesnt seem to be a well detailed guide on how to connect to a ble device. Ive been able to connect with bluetooth classic but not ble. I want to do the discovery and connection in one activity and the data collection in another.
+
+I was wondering if there is some advice or anybody experienced willing to help me directly?
+
+[https://pastebin.com/teC6RMm0](https://pastebin.com/teC6RMm0)",1
+androiddev,t3_ne6et7,How you promote your app?,"Hii
+I have launched an app on play store and there are 0 downloads/day so I want to promote it so it reaches more audience. What are the ways you use to promote your app? 
+Thank you!",1
+androiddev,t3_6ia582,Do any newer versions of ART support the new Java 8 byte codes?,"I know that for backcompat, lambdas are implemented under the hood using anon inner classes to get around the fact that new the bytecodes that Java 8 uses for this don't exist in Dalvik.
+
+But do newer versions of ART implement these byte codes? Thus targeting a higher min SDK would compile lambdas with the proper bytecodes vs the inner class work around?",1
+androiddev,t3_v0t2wt,wireless adb in ATV is always ON. how to make it always on in phones too?,"I noticed that I can with adb connect localhost:5555 use adb shell on my own device using termux.
+
+But, I need to start it with adb tcpip 5555 on another computer first.
+
+And then I remembered that on my Android TV device (Mi Stick) the wireless adb server is always online, I guess by design since you can't really plug it into a computer to jumpstart the wireless adb server.
+
+So, is there a way to keep it always on like on the ATV?",1
+androiddev,t3_gicmd3,First Look at Kotlin 1.4-M2: Standard Library Improvements,,0
+androiddev,t3_8dgr0c,Rethinking GPS: Engineering Next-Gen Location at Uber,,0
+androiddev,t3_3o1ilu,Keeping Your Android App Popular After Launch,,0
+androiddev,t3_vk9y5n,Credit Origination Process will Assist by Five ways in AI,,0
+androiddev,t3_kt25b2,How long are new apps from new developers taking to be reviewed in Google Play?,"Hello all. I'm started Android development very recently using Flutter. Three days ago I published my first app, a very simple one to display song lyrics, with a newly crated developer account. It says in the console it usually can take up to 7 days to review but because of Covid it can take longer. So I wanted to know if others have published apps recently and how long it took for it to be reviewed and uploaded, so I have a better idea of what to expect. It's not even the production version yet, it's still for a closed test.",1
+androiddev,t3_33n9jg,Introducing Ironhide! An Android user interface automation framework.,"Hey all Android programmers! Would you like to run your entire test suite with a push of a button? Then check out Ironhide!
+
+
+# [Check out Ironhide!](http://mindbody.github.io/Ironhide/)
+
+
+# What is Ironhide?
+Ironhide is an Opensource Object Oriented Android testing framework, written in Java, built on top of the Google Espresso testing framework. Ironhide provides an easier to use framework by handling some of the more complex elements of Espresso and Hamcrest matchers in the background, and providing the user with an easy way to create tests.
+
+
+# Why should I use Ironhide?
+You might be asking yourself ""Why would I need this testing suite?"" You might say ""I can manually test my app as I go."" However, think of Ironhide in this way: If you had a button that you could press that said to you “everything is good with the app” or “something is wrong” how often would you press that button? Every time before you release? Every time before you commit? Why not every time you build! Ironhide offers this tool, a magic button to push after you make a change to see if everything still works. Ironhide is a way to both quickly write up and run a test for your new feature, and then keep your tests in a full test suite to check functionality.
+
+
+On top of offering developers a way to include test driven development into their development cycles, Ironhide can make your Quality Assurance testing much easier. Often QA testing at the end of a development cycle can take a while, maybe even an entire day. Creating a suite of smoke tests that test your apps basic functionality can make everyone’s lives easier, and give you more time to find the bugs in your new features. Ironhide makes this happen by giving you tests that are easy to write, and more importantly easy to read. With a test suite thats easy to run and tell what broke when it fails, Ironhide can help cut down on your QA time significantly.
+
+
+It’s not uncommon for bug lists to be 100 or more bugs long! Many times this happens because rigorous testing only happening at the end of the development cycle. Without an easy way to test, developers just don’t have the time to manually test every time they commit a change. When bugs are only found at the stage before release, often there is not enough time to fix those bugs before they go out into production. In most of these cases the use of the magic button Ironhide could solve this issue. If testing is happening at every stage of development the number of bugs that come up in QA testing is significantly reduced. In an ideal world, QA should run through their test suite and come back saying “It’s all good, no bugs were found.” Now of course this isn’t always, if ever, going to happen, but Ironhide can help you get close!",0
+androiddev,t3_g6rc7v,Translations - Android + ios,"Android needs strings.xml to be translated for localization. iOS requires .strings files or .xliff to be translated. 
+
+I am wondering how people are managing both translation together when they are translated by professional translator.
+
+Any suggestions or pointers to process you are following would be of great help.",1
+androiddev,t3_aef2xs,Parsing dynamically changing json responses in android,,0
+androiddev,t3_ddh7tl,is it okay to put embed youtube videos in your monetized app ?," Let's say i made a recipes app that includes categories such as : Desert , Cake , Glutten Free ... etc ! and each category has videos from different youtube channels ! would that be against the rules ? would the app last or it would be removed ? If it's accepted, Is it okay to monetize it even though youtube videos have their own ads ?
+
+Any answer would be appreciated !",1
+androiddev,t3_q562me,Join us in a few hours with Chet Haase and let's talk about Androids: The Team That Built the Android Operating System,,0
+androiddev,t3_ammlln,Need help with Camera2 API,"**What I need**: An app that will capture multiple RAW images with predefined exposure and ISO settings, and store them with a custom name, with a button click. 
+
+**What I found**:
+
+- To get RAW images, I would need to use Camera2 API, which doesn't have a lot of learning material. 
+- Google Samples on GitHub has this [repository](https://github.com/googlesamples/android-Camera2Raw) which is a basic way to get RAW and JPEG images.
+- Within the code, I found setup3AControlsLocked method, which basically sets up the 3As, which are Auto Exposure, Auto Focus and Auto White Balance. 
+- Since I need to toggle exposure, I turned off only Auto Exposure, but my resultant images had different ISO than what I had set. I tried turning off all the 3As, yet I wasn't able to perfectly get what I wanted.
+- I suspect that this is due to me calling the takePicture method before the previous one had finished (because of callbacks I think).
+
+**Questions**:
+
+- How do I wait for the previous takePicture to finish?
+- Is there another way to do this instead of calling takePicture multiple times?
+
+Any help would be appreciated.",1
+androiddev,t3_sk9t08,Professional Makeup Courses In Mumbai | Enroll Now Makeup & Hair Artist Courses,,0
+androiddev,t3_9632fd,My app with all features not getting rank in play store," 1 year ago i launched my app. Added all features. Now the apps that lauched after me are getting high ranking and better downloads. Even they don't have features like mine app.
+Anyone can explain this Google play logic?",1
+androiddev,t3_5ncdbc,Talking Buck with Uber engineer Gautam Korlam (part 2),,0
+androiddev,t3_owik2f,Ffmpeg Library,Is there anybody who has worked with android Ffmpeg library I've been searching a lot on internet but cannot find a good also my job depend on this task so please if u can help I'll be very greatful to u.,1
+androiddev,t3_bqpisb,"Do you notice any performance issue when you use Kotlin in new feature, to interop with exsiting Java projects","We have a 100% Java project - https://wenote.me
+
+Since Google announces they're going to make Kotlin first, we decide to give Kotlin a try, in developing upcoming new features.
+
+We are concern on runtime performance, when using Kotlin to interop with exsiting Java code.
+
+I was wondering, for anyone who has experience in adopting Kotlin in exsiting Java project (Not a completely new Kotlin project), do you notice any performance issue, or do you think there are some catcha I should aware of?
+
+Build time is not a concern for us.  
+
+Thanks.",1
+androiddev,t3_fu6xxt,How can we achieve row_number and window function in Android Room SQLite?,"row\_number and window function of SQLite can be only found in SQLite version 3.25.0 and above.
+
+However, Android's SQLite is 3.19 and below.
+
+Is there any way I can achieve similar row\_number and window function in Android?
+
+[https://stackoverflow.com/questions/61010606/sqlite-achieve-equivalent-row-number-and-window-outcome-in-sqlite-pre-3-25-0](https://stackoverflow.com/questions/61010606/sqlite-achieve-equivalent-row-number-and-window-outcome-in-sqlite-pre-3-25-0)
+
+Thanks.",1
+androiddev,t3_4dxjlo,"RxJava, Kotlin... RxKotlin... can I just keep using Java or should I actually learn something here","Ok Android heads. What's going on, where should I focus my efforts and why?
+
+Am I going to be joining teams a year from now where the prerequisite is using RxJava at one company, and Kotlin at another?
+
+Today, I saw this one month old Square library using Observables without focusing on the fact they were using Observables
+https://github.com/square/whorlwind
+
+""Shit, I need to learn RxJava since Square knows what they're doing"", I thought.
+
+Now, actual new things in Android today I won't need to learn till like August, 2018 to remain competitive when someone else wants me to work for them. So I'm not concerned, but I'm definitely not really following why these particular coding paradigms and frameworks are gaining so much support.
+
+What are your thoughts?",1
+androiddev,t3_ags43u,I have an Android dev that makes .apk files for me. Whats the best way to test this on a Windows 10 computer?," I'm looking for a good way to test .apk's on windows 10. I don't want to install it on my phone, but just test it on my desktop first. Whats a good android emulator to make a quick easy test? I read bluestacks has a lot of ads, but what's a good easy alternative? ",1
+androiddev,t3_4xmq70,Twins,,0
+androiddev,t3_9eh2o9,Is Android Studio really buggy?,"I started the Google Udacity Android Development course a few months ago and felt that I wasn't really understanding a lot of the content and left it. Anyway, I've now studied a bit of Java and gained a lot more understanding about programming generally so I thought I'd have another go with the Udacity course.
+
+I downloaded Android Studio afresh and I can't seem to get anything to work! After downloading the git repo for the course and the same project which was working fine before, now seems to be totally inoperable. I'm getting `Cannot Resolve Symbol`  messages for all of the recycleViews, despite this being in the list of imports. When I run this on the emulator, the app seems to work perfectly.
+
+I tried to look for other tutorials and when I was playing around with constraintLayout, none of the elements would show up on the preview screen. I changed the theme and then it became visible. Now I don't know enough to say definitively that this is a bug but I distinctly remember things working much better in my last foray into Android development.
+
+StackOverflow seems to be full of people with similar issues to me and a lot of people suggest making changes to the gradle manifests. I've implemented all of these but nothing has totally resolved the issues that I'm facing.
+
+Has some major update been implemented which makes the tutorials obsolete? From my experience today, it seems that Android Studio is totally unusable for someone who isn't experienced in it at the moment - bear in mind that I had no problems when I used it before, it was the concepts in the tutorials which went over my head.",1
+androiddev,t3_bt7928,Protecting pet project identity,"Hi!
+
+I'm making an app with a friend, and we hired a UI-designer who designed a very nice looking UI for us, including app icon, simple ""design language"" for app's UI components etc.
+
+What worries me now a bit is that as soon as we publish the UI-update, anyone with malicious intent will be able to simply decompile the app and steal icon, images, maybe even whole app look can be replicated with our resources by someone else.
+
+I was thinking of ways to protect our app (maybe registering a trademark since even the app's name is not registered anywhere else outside of Play Market), but then I started to doubt - is it worth it? Is there even a tiny possibility that someone would look at our tiny app (which has only a couple of installs) and would think: ""hey, they have a nice design, let's steal it""?
+
+Do you try to somehow protect your pet project app's identity? Or maybe Play Market protects it automatically, accepting complaints about thief-apps even if you don't register any trademark anywhere?",1
+androiddev,t3_ya1ei8,what is this icon/symbol & for what?(On status bar),,1
+androiddev,t3_2vh90l,[Feedback] Would love your feedback on the home screen design we did in Material.,Here's a link to screenshot: http://i.imgur.com/FYjNTZa.png,0
+androiddev,t3_4fgy2m,Free Android weather resources for Android app,,0
+androiddev,t3_tnutxj,Create Android App using Android Studio | Hello World in Android Studio," \[ Create Android App using Android Studio | Hello World in Android Studio \].  Hey, developer, I'm going to start a new series for newbie developers, in this post you will see how you can create your first Android App with Kotlin using Android studio, your first Android App will be the hello world app with Android Studio. This hello world app idea will give a basic idea of App development, so watch the below video till the end, after completing this video you will be able to build the first android app. Follow this video step by step.  
+
+[https://youtu.be/Zi6edwP9Q54](https://youtu.be/Zi6edwP9Q54)",0
+androiddev,t3_mgfuwu,App Center Change Owner/Transfer Apps,I have an old account in **App Center** and now I want to **transfer all the applications** from that account to a new account. Is there an option to **change owner**???,1
+androiddev,t3_2g901i,"Parsing arraylist of strings, to open them as URI's with gallery intent","This is causing me a lot of trouble.
+
+ I have an arraylist of strings that will consists of URI's, and i want to do an intent to open those URI's with gallery.
+But with my current code it just open gallery with the text ""no thumbnail""
+
+Here is the code for the method:
+
+     public void btnChoosePhotosClick(View v){
+
+        ArrayList<String> selectedItems = imageAdapter.getCheckedItems();
+        Toast.makeText(MainActivity.this, ""Total photos selected:      ""+selectedItems.size(), Toast.LENGTH_SHORT).show();
+        Log.d(MainActivity.class.getSimpleName(), ""Selected Items: "" + selectedItems.toString());
+
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setType(""image/*"");
+        intent.setDataAndType(Uri.parse(""file://"" + selectedItems), ""image/*"");
+        startActivity(intent);
+    }
+
+I just want to know if it's possible to do with the arraylist, or if i will have to get them as URI files. It works perfectly fine if i hardcode the URI instead of selectedItems.
+
+Thank you!",0
+androiddev,t3_e2h0bm,Creating a custom shortcut in Android.,"OpenVPN connect app can create shortcuts, which when clicked connect to a VPN server directly.  
+Hotspot shield app - We can select apps which when opened will trigger hotspot shield first then themself.   
+My target is to make it so that when I open a certain app, it connects to the OpenVPN server and then open itself.
+
+How can I achieve the above aim? Are there any apps that can create custom shortcuts that can serve my purpose?",1
+androiddev,t3_6io13l,"StackOverflow application for Android crashes due to ""save&restore"" bug",,0
+androiddev,t3_48wped,Picking my next Android image loading library: Picasso!,,0
+androiddev,t3_olliz5,Advance Prosthetic Makeup - Learn Advance Prosthetic Makeup In Mumbai | BSMH,,0
+androiddev,t3_2u76u9,Android Studio: Import settings.jar through command line,"I've been tasked with deploying Android Studio to some classrooms for a new dev class and I need to force all user accounts to import my settings.jar before they have an opportunity to create their own within appdata (otherwise they'll waste half the class downloading the platforms that I've already cached). I can't seem to find any information on studio64.exe's commad line options. What is the best way to do this?
+
+Thanks.
+
+edit: I think I've got it. I'm using the standalone zip that's been copied to root\android and because of the nature of the major they've already got admin access. I just have to create a directory junction from `%userprofile%\.androidStudio` to `C:\Android\.AndroidStudio` and do the same for the sdk. Woo!",1
+androiddev,t3_5adm6b,FlowUp - Monitor app performance in production phones,,0
+androiddev,t3_9f9bdd,Project that is injecting all the views from xml in each Activity/Fragment with dagger.,"Hello,
+
+I've ended up with a project that uses dagger, nothing out of the ordinary, except one thing. It turns out that every view from the xml gets injected via a Daggermodule.
+
+Basically every activity has a module, when created in the activity/fragment, the module gets the activity passed in and then there is a ton of @Provides, one for each and every view from the xml that gets used by the activity/fragment. Every provides method is a ""return activity.findViewById(ID)"" and are differentiated with a @Named annotation to separate them. Final thing that happens is theese views gets injected into a separate class that handles dispalying the data (setting the text, setting clicklisteners etc etc..
+
+Hopefully you kinda get the idea (I've only been able to take a small look on the actual code so i haven't been able to dig up all the specifics) 
+
+Seeing this left me with a bad taste in my mouth. First of all the amount of boilerplate you have to write for every view you need to inject, but also, wouldnt this skyrocket the methodcount really fast?
+
+Am i missing something good here? I tried finding anything on the internet validating this as something good but i had a hard time really finding anything on this subject at all. The only thing i found was this thread [Link](https://stackoverflow.com/questions/20821148/difference-between-dagger-and-butterknife-android) where in the comments, Jake Wharton, bolster my idea that this is something bad. Specifically stating that using dagger to inject views will lead to a bad time.
+
+Except for the bad things i stated above, do i have to worry on even more things?
+Do anyone here see this as a valid or atleast feasible solution that can explain what i am missing.",1
+androiddev,t3_do05mn,Hopper Library,"Have a look at the new animation library [Hopper](https://github.com/EfeBudak/Hopper) that I have developed to make [hop animation](https://android.jlelse.eu/android-onboarding-hop-animation-1d1651b87e2c) super simple for android developers.
+
+Feel free to send PRs and your suggestions. Happy coding.
+
+[https://github.com/EfeBudak/Hopper](https://github.com/EfeBudak/Hopper)",0
+androiddev,t3_hj5qdl,Flutter library to add various gesture callbacks to each Shape you draw,,0
+androiddev,t3_75gm94,Firestore competitor in top 10 on Product Hunt Today!,,0
+androiddev,t3_tggbys,Android 13 Developer Preview 2,,0
+androiddev,t3_c5lco7,Using Android Play Billing 1.0 for release?,"I was following along with this documentation [Play Billing Guide](https://developer.android.com/google/play/billing/billing_library_overview) It say use billing 2.0.1 to follow along with the source from github, but the source is not up to date for the newer BillingClient packages. Using billing 1.0  [The Source](https://github.com/googlesamples/android-play-billing/tree/master/TrivialDrive_v2)  work just fine, and I can quickly adjust it for what I need in my app(Just one purchase to unlock all app features). So that's brings me to my question, Is there any problems using 1.0 in a release?",1
+androiddev,t3_if9lk2,Don’t let players leave your Unity game with Google Play In-App Reviews,,0
+androiddev,t3_3og6dz,Are there any libraries or algorithms available to help with defining custom shaking gestures in Android,"I'm working on a small Uni project which aims to detect shaking gestures on a smartphone as a means to send a message. I was just wondering if there was anything available to help me achieve this, thanks. 
+
+Also, how difficult would it be to avoid common gestures from triggering the shake detection (so that when a user is running, for instance, this is not going to be interpreted as a valid shake event)?",1
+androiddev,t3_cw7bl0,Question about the play store dev account,"Hello fellow android devs, I need an advice from you, I am in the situation where I have got two strikes in my developer account, which I opened 8 months ago to make an app for a client. The app in question was a webview of a site i developed, for my client, but his business was cannabis related (which is legal in my country). I know a webview is bad, I had time constrain and was in a rush to publish. Big mistake. At first I thought the strike was related to content rating, but google updated his policy and there they said don't allow selling anything cannabis related. ok. My webview had a shopping cart feature, It made sense.
+So after that I pretended to make him a very simple app, basic feature, all native, no shopping cart whatsoever and it is almost ready. But I am terrified to publish it.
+
+Question number one: as I have two strikes, I made my client open his dev account to upload there the app and test it before publishing (another mistake I did, I went straight to production).  Is this the safest way for me to not receive the third strike? Our account are connected, as I can upload the apk on his account.
+As I imagine, the strike, if any, will go to his account.
+
+Question number two: as I don't have any app published on my account, I was thinking to close it. But do you think guys if one day I re open it it will still be there with the two strikes ?
+
+Thank you for any advice you can give me.",1
+androiddev,t3_hhrps5,My 2020 New Years Resolution was to Make a New Android App Every Month. This is a Reflection of my Last Six Months!,,0
+androiddev,t3_tk2c0t,Green Apex Technolabs - Top Mobile App Development Company in India,,0
+androiddev,t3_2w4zxm,Reducing APK size when using native libraries — how we made Realm 76% smaller,,0
+androiddev,t3_29juu8,Android Tile Animation,"Hi All,
+
+I need to apply Tile Animation .Please give me an idea how to do this . As below I have paste the youtube link for the Tile Animation.
+
+https://www.youtube.com/watch?v=HsTRmr9zjDU",0
+androiddev,t3_61e1qi,Moving to xamarin from native android,Any good resources on xamarin for someone who is familiar with native android development?,1
+androiddev,t3_m50qwh,Compile less with SOLID,,0
+androiddev,t3_4ancn2,[CyanogenMod] Moto G 2013 [falcon] Any chance of getting android N [6.1] in cyanogenmod?,,1
+androiddev,t3_832rd7,How to take a webpage's content to create a native app for it? i.e. not just a webview of the website,"Hello,
+
+I want to create an app for a website that I don't own, like youtube or reddit. Every time I search for help, all I keep getting is how to create a webview. I've done that but that's not what I want. I want to take the website's content and create an app with it, like create my own buttons and such. I want to *convert* a website into an app. 
+
+I was thinking of somehow loading the website in the background and creating activities/buttons/intents that basically do what the webpage does but I don't know how to go about that or if there's a better way.
+
+Thank you in advance.
+
+
+Please let me know if clarification is needed.
+",1
+androiddev,t3_9ljc5g,Camera MX vs Open Camera: Duel of Android Photography Apps,,0
+androiddev,t3_9q4u37,How to install android official on PC 2018,,0
+androiddev,t3_400tgr,"This helped me get started with an MVP, Retrofit and Rx architecture and it worked great for me.",,0
+androiddev,t3_99dyaa,Call Restful Web Services from Android client for User Login with Retrofit 2,,0
+androiddev,t3_d3srkg,"How do I save files (photos, mostly) to the device's (real one or emulator) internal memory?","I'm new to android, so pardon if this question might sound noobish.
+
+Now, I understand that, android only has two types of storage (according to the documentation, paraphrased as follows):
+
+1. ""Internal Storage"" : app-only access, can't be seen by other apps and the user
+2. ""External Storage"" : world-readable (other apps and the user), can be the SD card
+
+My app requires that the user can see the image files, and consequently transfer them to a computer or whatever. So, ""Internal Storage"" is a no-go, so my question is
+
+Can I save it in the ""External Storage"", and always expect it to be saved to the **internal memory** of the phone, and **not** in the SD card? (I mean, nowadays, internal phone memory is huge; also, Android Q's scoped storage, how do?)  
+
+
+P.S. I'm so confused at this as of the moment and so as current 'solution,' I'm putting my camera-captured photos directly to the SQLite database and I'm very well aware of its shittiness",1
+androiddev,t3_xvl8dy,Can someone explain API levels?,"Here's the list of API levels: [https://source.android.com/docs/setup/about/build-numbers](https://source.android.com/docs/setup/about/build-numbers)
+
+AFAIK, APIs levels are forwards compatible i.e. if I target API level 27, then I can support Oreo 8.1 and newer versions.
+
+On the other hands, according to Google Play store policy, new apps must use API level 31: [https://support.google.com/googleplay/android-developer/answer/11926878](https://support.google.com/googleplay/android-developer/answer/11926878)
+
+So, how do I make sure my apps run on older Android versions (Oreo 8.1 and newer)?",1
+androiddev,t3_hxlxir,"App Feedback Thread - July 25, 2020","This thread is for getting feedback on your own apps.
+
+####Developers:
+
+- must **provide feedback** for others
+- must include **Play Store**, **GitHub**, or **BitBucket** link
+- must make top level comment
+- must make effort to respond to questions and feedback from commenters
+- may be open or closed source
+
+####Commenters:
+
+- must give **constructive feedback** in replies to top level comments
+- must not include links to other apps
+
+To cut down on spam, accounts who are too young or do not have enough karma to post will be removed. Please make an effort to contribute to the community before asking for feedback.
+
+As always, the mod team is only a small group of people, and we rely on the readers to help us maintain this subreddit. Please report any rule breakers. Thank you.
+
+\- Da Mods",0
+androiddev,t3_6w5an1,"App Feedback Thread - August 26, 2017","This thread is for getting feedback on your own apps.
+
+####Developers:
+
+- must **provide feedback** for others
+- must include **Play Store**, **GitHub**, or **BitBucket** link
+- must make top level comment
+- must make effort to respond to questions and feedback from commenters
+- may be open or closed source
+
+####Commenters:
+
+- must give **constructive feedback** in replies to top level comments
+- must not include links to other apps
+
+To cut down on spam, accounts who are too young or do not have enough karma to post will be removed. Please make an effort to contribute to the community before asking for feedback.
+
+As always, the mod team is only a small group of people, and we rely on the readers to help us maintain this subreddit. Please report any rule breakers. Thank you.
+
+\- Da Mods    
+",0
+androiddev,t3_51eemi,Simple introduction screen animation using PageTransformer,I uploaded a basic but useful animation for introduction screens using **PageTransformer** on github. You can find it here [Animation using PageTransformer!](https://github.com/pushpendra-spartan/introduction-screen-animation),0
+androiddev,t3_6dj652,Realm Vs Room,"I was using Realm only because it allowed me to listen for changes in db. Now since Google has announced Room which also lets me set listener to any table, What advantage would Realm have over Room?
+Shouldn't I switch to Room? 
+
+**Edit:** Besides I hate that Realm doesn't let you store a list of primitives. Wrapping a simple String in a custom object is is too much overhead. Also it doesn't let me extend any other class. I know composition is preferred over inheritance but there are some cases where you need to extend some class.
+
+I'm currently working on the app so switching to Room, Realm or something else won't be an issue for me.",1
+androiddev,t3_eo154h,What android libraries do you highly recommend?,,1
+androiddev,t3_jte0df,Android App Development Trends to Watch Out in 2021,,0
+androiddev,t3_6do3qv,An anti-bikeshedding Kotlin linter with built-in formatter.,,0
+androiddev,t3_kvp6y6,Stop wasting your Android gradle daemons,,0
+androiddev,t3_2t88o2,When to switch from learning Java to learning Android Dev?,"First off I am currently going through all the beginner Java tutorials in the wiki. I have a brief background in C# as well. I am just wondering when I should stop focusing solely on Java, and when I can start looking at the Android App development side? Does anyone have a sort of benchmark or code example I should understand before moving forward? I know this is super broad, but I'm just curious as a noob when to starting digging into Android stuff.",1
+androiddev,t3_c57df3,Best method to detect adblockers?,"Hey everyone!
+
+So my todo list for today was to see if there's a way to detect adblockers in an android app. After a bit of googling it appears that one popular method for adblockers is to edit the /etc/hosts file and redirect any ad requests (like requests going to [admob.com](https://admob.com)) towards [127.0.0.1](https://127.0.0.1) (pretty similar to what is done on PC to crack paid apps).
+
+So a naive way to detect if an adblocker is present is to check that hosts file (which is publicly readable) to see if there's any suspicious redirect to [127.0.0.1](https://127.0.0.1) (except for the normal [127.0.0.1](https://127.0.0.1) localhost line). 
+
+However this seems a bit too easy to me, so I have two questions:
+
+* Is there any reason for a redirect to [127.0.0.1](https://127.0.0.1) to be present in /etc/hosts other than adblocking? 
+* Are there any other methods for adblocking? AFAIK writing /etc/hosts requires root privilege, but I think I've heard of adblocking apps that do not require root. Anyone know how they work?
+
+If anyone has any more information on how to reliably detect adblockers, I'm all ears!",1
+androiddev,t3_318jsc,#alfi - Android Library Finder,,0
+androiddev,t3_bvxa3i,Does Anyone Still Use Eclipse for Android Development?,,1
+androiddev,t3_dm3yg0,Official Jetpack Compose Website,,0
+androiddev,t3_9795qe,SnappzMarket APK Free Download v3.0.7.7 Latest For Android,,0
+androiddev,t3_f668eb,Failed to resolve: androidx,"Please Help, I cannot resolve the problem.
+
+Affected Modules: <a href=""openFile:D:/Downloads/NEW DOWNLOADS/1/LEGITNAIMAMA/app/build.gradle"">app</a>
+
+I have already migrated to Android X 
+
+but it still does not solve the problem	
+
+&#x200B;
+
+Here is my build.gradle file
+
+&#x200B;
+
+apply plugin: 'com.android.application'  
+apply plugin: 'com.google.gms.google-services'  
+android {  
+compileSdkVersion 29  
+ buildToolsVersion ""29.0.3""  
+ defaultConfig {  
+applicationId ""com.android.legitnaimama""  
+ minSdkVersion 16  
+ targetSdkVersion 29  
+ versionCode 1  
+ versionName ""1.0""  
+ testInstrumentationRunner ""androidx.test.runner.AndroidJUnitRunner""  
+ }  
+buildTypes {  
+release {  
+ minifyEnabled false  
+ proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'  
+ }  
+}  
+}  
+
+
+dependencies {  
+implementation fileTree(dir: 'libs', include: \['\*.jar'\])  
+implementation 'androidx.appcompat:appcompat:1.1.0'  
+ implementation 'androidx.constraintlayout:cons  traintlayout:1.1.3'  
+ implementation 'com.google.firebase:firebase-auth:19.2.0'  
+ implementation 'com.google.firebase:firebase-database:19.2.1'  
+ implementation 'com.google.android.material:material:1.1.0'  
+ implementation 'androidx.annotation:annotation:1.1.0'  
+ implementation 'de.hdodenhof:circleimageview:3.1.0'  
+ testImplementation 'junit:junit:4.13'  
+ androidTestImplementation 'androidx.test.ext:junit:1.1.1'  
+ androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'  
+ implementation 'de.hdodenhof:circleimageview:3.1.0'  
+ implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'  
+}",0
+androiddev,t3_ck6yhd,Nice article about over engineering,,0
+androiddev,t3_1206te,Multiple people working on same project?,"Hey i'm new to android development and all its wonders,
+
+I'm currently working on a project with a friend but each time one of us wants to change something we have to copy the project file over and then import it each time which is very annoying and time consuming. Is there a easier way for multiple people to work on the same project at the same time?",1
+androiddev,t3_6vso3h,Understanding the performance benefits of using ConstraintLayout,,0
+androiddev,t3_w8m0xz,How to sign-in with Google using Firebase Auth in Jetpack Compose,,0
+androiddev,t3_uq9qt8,Some of the best mobile app no code/low code development platforms out there?,"I’m looking some user friendly platforms for creating a to-do app for both android and IOS. What are my best options in terms of flexibility and features? I’m not a coding expert but I’d like to have the option to use coding skills in the future if necessary.
+
+It’s mostly a front end project but some backend development may occur.
+
+Thanks in advance.",1
+androiddev,t3_67nls7,Learn Words and Languages through Online Word Games - Play My Word,,0
+androiddev,t3_nsquid,Android Beginner Course,,0
+androiddev,t3_fkn3aj,Is Unity a good engine to develop multi-platform applications (non games)? Are there better alternatives?,"I wanted to develop a multi-platform (iOS and Android) quiz/trivia game similar to the Brand Logo games. However, I am confused as to what language/engine to use.",1
+androiddev,t3_e1xj0l,How does the issue tracker works? Is it worth to write bugs there ?,"I was wondering how does the Issue Tracker works and if it's worth spending time writing bugs in there. 
+
+
+
+My personal experience is like this:
+
+
+1. I reported a small bug in Navigation Component, which was easy for them to fix, they fixed it and I got an answer in like 2 days.
+
+
+2. I reported a bug also in Navigation Component, 3 weeks no update.
+
+
+3. I was having problems with Paging Library, found out more people have the same problems. There are a couple of issues on their IssueTracker. One of them is from 2017 and was closed as ""Won't fix"" because as they say it's not a problem of the Library but of the RecyclerView. Another one is open for like one year without any update from Google.
+
+
+
+
+
+
+For example number 3 is really causing an issue in my project and I don't know what should I do, should I wait for a ""possible"" update or should I look into other Implementations without Paging Library. When looking at Paging Library Issues, it looks like it is abandoned, a lot of open bugs and feature requests without updates. As they said that it's a RecyclerView problem, I created another issue but already for RecyclerView, but Google doesn't seem to be active there as well. 
+
+
+
+
+
+
+So correct me if I am wrong. For me bug reporting is like helping developers create a better product. So how can I be motivated to report bugs if I'm not getting any feedback? If the bug is not in your product but from other team just close it as in case Nr. 3? Seriously? Why not notify the other team about it or move it to their board?
+
+
+
+
+
+Here are the issues I was talking about:
+
+1. https://issuetracker.google.com/issues/136021571 - Quick Fix
+
+2. https://issuetracker.google.com/issues/143828487 - No response
+
+3. https://issuetracker.google.com/issues/72614329 - ""Won't fix"" case
+https://issuetracker.google.com/issues/129513680 - Open for almost 1 year and no update
+https://issuetracker.google.com/issues/144887174 - Moved to RecyclerView board
+
+
+
+
+
+
+
+Another 2 good examples I know about are these:
+
+https://issuetracker.google.com/issues/79672220
+
+https://issuetracker.google.com/issues/80029773
+
+just look what happens in the comments. Everyone is constantly asking for update or they just write +1.",1
+androiddev,t3_olrzd7,Third party library,Can I use third party library from GitHub that no longer is maintained because I don't want to reinvent the wheel by writing whole code and I am also a beginner (old library I mean since 1 or 2 year library has not been updated),1
+androiddev,t3_39pvfb,"Which Android One device for development, and why?","We use a lot of devices for testing. Nexus 4, Nexus 5, Nexus 6, Nexus 7, Galaxy S6 or Zenfone 2 are just a few examples. It's easy to fall into the trap of thinking devices like the Nexus 4 or the Nexus 7 are low end nowadays, but that's just not true.
+
+For development purposes and to ensure a butter smooth experience for all users, I'm considering getting an Android One device and using it as the main device for development.
+
+Which one would you get, and why? Or do you suggest a different device?",1
+androiddev,t3_oz0par,Do you find it easy to code in a markup way or the compose(flutter) way?,"Hii
+
+I want to know if you find easy to program in the markup way(like the xml files or like react native has built in hooks in javascript) or like the compose way in which you programmatically add the UI? I want to know that if other also find it easy to code in xml or hook way(like me) or I am really dumb to like it.
+
+Thank you =)",1
+androiddev,t3_phvryi,Personal Makeup- Learn Professional Personal Makeup In Mumbai,,0
+androiddev,t3_jbk5w3,Java 16 getting Vector API (SIMD/AVX) integration,,0
+androiddev,t3_tgzo0y,MVI with usecase instead of repository?,"I've been an MVVM fan since forever, but the guys want to jump to MVI which I find a bit too over complicated for my taste, next year they'll come up with something else and we need to refactor again. 
+
+but anyway, I been creating Usecases to connect VM-Repository, and when I look at some MVI sample I only see them using repositories and no usecases, is this something common? can I not have usecases since it seems like it's an important architecture block, 
+
+or am I missing something? thanks",1
+androiddev,t3_3cgga2,Adding media playback capability,"I've made a few 'beginner'-type apps and now I'm building something a little more complicated. I'm trying to add the ability to play back media files (both from the device and streaming) to an app and I'm a little stuck. I've been looking at ExoPlayer and feel pretty lost trying to understand the terminology and general concepts involved. 
+
+Media playback will be a core function of my app, so I'd like to get a good grasp of this stuff. I thought I would ask if anyone knows of any books or online resources that provides a gentle introduction to the kinds of concepts involved in programming for media playback. I'm at that point where I'm not even sure what I need to search for to get started on this. Any help would be very much appreciated :)",1
+androiddev,t3_lgu6p6,Creating Spring-back animation for RecyclerView from scratch,,0
+androiddev,t3_b38oq9,Google’s new requirements will make every Play Store icon a squircle,,0
+androiddev,t3_a4ax6y,Any thoughts on this design?,,1
+androiddev,t3_vvog4m,App doesn't work on Nokia 1 in tests,"Hey, my app randomly doesn't work on 1 device when trying to upload to google play store and I can't really do anything about it, which would be OK if I was able to remove the device from the device list, but I can't. I can't find Nokia 1 anywhere on the device list, I've already banned every device that has similar name, but sadly when I test new version, google play console still tests my app on this device and shows an error. What can I do about it?",1
+androiddev,t3_orwsas,Tic Tac Toe Game Development | Android Studio Tutorial | In 30 Minutes | Confetti Particle System,,0
+androiddev,t3_27hzdt,Android Studio 0.6.0 Released,,0
+androiddev,t3_389lkb,Alternatives to GCM,"I am developing a push notification app with two other individuals and we are able to send push notifications to a android device via GCM, how ever the problem is that there is a delay from when we send the push to when the app receives it.
+
+I was wondering what alternatives there for GCM we are expecting around 100 million push notifications to go through this app per month. I appreciate any help that can be given",0
+androiddev,t3_5xwsbo,Pull vs Push & Imperative vs Reactive – Reactive Programming [Android RxJava2] ( What the hell is this ) Part2,,0
+androiddev,t3_cmyjqn,Interesting article examining the disambiguation between employees/partners of large corporations - specifically YouTubers joining forces with unions in Germany - who argue that contributors who are rated/removed are similar to employees - may have relevance to developer relations,"**NOTE:** this is an interesting development which may also be relevant for android developers vs Google relations.  See the **References** section below for the practice of ""associated account bans"" by Google, and the leveraging of lifetime bans on developers to push them to support apps which have been unpublished (developers cannot remove/delete apps themselves).
+
+----
+
+&nbsp;
+
+
+Saw this news story today:
+
+- [Thousands of YouTubers want to unionize, and they’ve got the support of Europe’s largest trade union](https://www.cnbc.com/2019/08/06/youtubers-want-to-unionize-and-theyve-got-the-support-of-ig-metall.html)
+
+This move in Germany was started by that famous German slingshot maker on YouTube:
+
+>Jörg Sprave is a YouTuber based in Germany who builds and tests extreme slingshots and crossbows.
+>
+>Sprave started the YouTubers Union Facebook group in March 2018 as a place for dissatisfied creators to gather and organize against YouTube’s new advertising rules. The group now has over 20,000 members.
+>
+>Sprave’s took his efforts to the next level in July, when the YouTubers Union partnered with IG Metall to start the FairTube campaign. IG Metall is a German union founded in 1949 with over 2 million members, making it Europe’s largest trade union.
+>
+>YouTube has pushed back against FairTube and IG Metall’s claims of unfair treatment. “We’re deeply invested in creators’ success,” a YouTube spokesperson told CNBC Make It. “We also need to ensure that users feel safe and that advertisers feel confident that YouTube is safe for their brand. We take lots of feedback as we work to get this balance right.”
+>
+>Still, FairTube is not backing down on its demands for change at the company, and it has set a deadline of August 23, 2019 for YouTube to come to the negotiating table.
+>
+>FairTube’s demands for YouTube include:
+>    Transparency in decisions surrounding demonetization
+>    A direct line of communication to a company representative
+>    An independent board to resolve disputes between creators and YouTube
+>    A YouTubers advisory board where creators can weigh in on company decisions
+>
+>“YouTube calls the YouTubers ‘partners,’ but in reality that’s not the case,” Sprave said in a video announcing the campaign. **“YouTube has all the power, and this is not how a partnership works.”**
+>
+>One method is claiming that YouTubers are actually employees of YouTube and not self-employed like the company claims. **“There is some evidence that YouTubers may be falsely self-employed. For example, they are continuously rated and monitored by YouTube, and only YouTube managers the relationship with advertisers,”** said IG Metall lawyer Thomas Klebe in a video announcing the partnership.
+>
+>FairTube is also considering appealing to the European Union’s General Data Protection Regulation (GDPR) that went into effect last year. **GDPR states that individuals have a right to request a copy of their personal data collected by companies. FairTube claims that YouTube’s decisions about whether or not to place ads on individual videos fall under this umbrella, and that data should be made available to YouTubers as part of GDPR.**
+
+----
+
+&nbsp;
+
+
+**Google as Reseller vs. middleman/partner - for android developers**
+
+The analogy with a Walmart maybe illustrative - they too resell products, and retain the right to carry a certain product or drop it.
+
+However, the difference here may be that - for example with apps on Google Play - the apps and their sales are not represented as being re-sold by Google (correct me if I am wrong), but as partners.
+
+Although I do not know how the gradual move from Google not charging taxes, to now steadily being responsible for tax deductions for some countries is moving it towards a more Google-managed state.
+
+I am forgetting what Apple calls it's relationship with developers (perhaps someone can comment on this) - whether Apple considers itself as a reseller, or as a middleman/partner - since they have a closer lock on app quality monitoring before submission (something Google is now moving towards - although much more automated than Apple it seems).
+
+&nbsp;
+
+**'Right to be forgotten' for developers**
+
+That last paragraph is interesting - as something similar befalls developers in their interactions with Google.  Often there is a lack of context for Google communications, and more alarmingly a lack of context for app bans or developer account bans (including in the cases with ""associated account bans"").
+
+The textbook case of the wife being banned for the crimes of the husband - a lifetime ban from Google that would survive divorce - has previously raised the question of whether the ""right to be forgotten"" laws could be relevant to such cases.  For example if the husband divorced, and forgets the wife, but Google does not forget her previous association with that spouse.  This seems like a classic case of ""right to be forgotten"".
+
+----
+
+&nbsp;
+
+
+**References:**
+
+Google's practice of lifetime bans for android developers - bans which percolate from acquaintance to acquaintance.  In all likelihood a wife would face an immediate ban if her husband has already been banned - this association would survive divorce:
+
+- [Google's practice of ""associated account ban"" - AKA ""guilt by association""](https://www.reddit.com/r/androiddev/comments/ckoej1/googles_practice_of_associated_account_ban_aka/)
+
+- [Google's practice of ""associated account ban"" - Part 2 - when automation trumps humans](https://www.reddit.com/r/androiddev/comments/cm042q/_/)
+
+
+This looks an awful lot like forced labor (with lifetime account ban as leverage/threat):
+
+- [Google Play Support is making it mandatory to fix permission compliance with years old , UNPUBLISHED apps](https://www.reddit.com/r/androiddev/comments/ckk81r/_/)",0
+androiddev,t3_5ag3wl,Demoing an app in a presentation - best (free) way?,"I'll need to demo an app to a room of people. Here's what I've tried so far:
+
+* Mobizen: Wifi works but super laggy with a large delay, USB connection will not work
+* Airdroid : Same as Mobizen with a wifi connection, the wifi connection is very delayed and choppy
+* Vysor : Lag is greatly reduced, but the quality is abysmal unless you buy the paid version
+* AS Emulator : Suffers from many of the same lag problems
+
+Is there any way to mirror my screen via a USB connection that will basically have a clear picture and minimal delay? ",1
+androiddev,t3_kmc3as,Why is there are so much boilerplate code?,"Hi, i'm a begginer to android develoment coming from web development. I started learning RecyclerView and Retrofit(for consmuning rest API's) and i'm overwhelmed by the amount of code that needs to be written for the above two functionalities. Is every simple functionalities going to need a bunch of classes and interfaces for implementing or are these two are just outliers?",1
+androiddev,t3_2cgrz9,Android Instagram API Examples?,Has anyone ran into any examples using the Instagram API to get all a non-private user's pics? I think I've searched beyond the Internet and I'm starting to think that without authentication it's not possible.,1
+androiddev,t3_79xz2r,MaterialDrawerKt 1.2.0 is out,,0
